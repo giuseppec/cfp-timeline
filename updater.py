@@ -520,7 +520,7 @@ class ConfMetaData:
 		if require_common and left and right and not common:
 			return np.inf
 		else:
-			return n_l + n_r + 10 * n_l * n_r - 4 * n_common + sort_diff
+		 return n_l + n_r + 10 * n_l * n_r - 4 * n_common + sort_diff
 
 
 	@classmethod
@@ -784,8 +784,10 @@ class CallForPapers(ConfMetaData):
 		if self.url_cfp is None:
 			self.url_cfp = prev_cfp.url_cfp
 
-		# direct extrapolations to previous cfp + year_shift
-		for field in ('conf_start', 'submission'):
+		# Direct extrapolations (year-shift) from previous cfp.
+		# Added abstract, notification, camera_ready so that submission deadlines,
+		# final version due, and review period are preserved.
+		for field in ('conf_start', 'submission', 'abstract', 'notification', 'camera_ready'):
 			if field in self.dates or field not in prev_cfp.dates:
 				continue
 			n = Dates.__slots__.index(field)
