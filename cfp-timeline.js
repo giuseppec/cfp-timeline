@@ -9,11 +9,11 @@ const today = new Date();
 
 const month_name = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const timeline_zero = Date.UTC(today.getFullYear(), today.getMonth() - 6, 1);
+const timeline_zero = Date.UTC(today.getFullYear() - 1, 0, 1);
 const date_zero = new Date(timeline_zero);
 
 // some global variables
-let timeline_max = Date.UTC(today.getFullYear(), today.getMonth() + 18, 0);
+let timeline_max = Date.UTC(today.getFullYear() + 1, 0, 0);
 let date_max = new Date(timeline_max);
 // % per month: 50px / duration of 1 month
 let timeline_scale = 100 / (timeline_max - timeline_zero);
