@@ -9,22 +9,23 @@ const today = new Date();
 
 const month_name = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const timeline_zero = Date.UTC(today.getFullYear() - 1, 0, 1);
-const date_zero = new Date(timeline_zero);
+let timeline_zero = Date.UTC(today.getFullYear() - 1, 0, 1);
+let date_zero = new Date(timeline_zero);
 
 // some global variables
 let timeline_max = Date.UTC(today.getFullYear(), 0, 0);
 let date_max = new Date(timeline_max);
 // % per month: 50px / duration of 1 month
 let timeline_scale = 100 / (timeline_max - timeline_zero);
+let timeline_scale_px = 0; // pixels per millisecond for precise alignment
+let default_timeline_zero = null;
+let default_timeline_max = null;
 
 const timeline = document.getElementById('timeline');
 const suggestions = document.querySelector('#suggestions');
 const form = document.querySelector('form');
 const filters = {};
 let data = [];
-
-let filtered_confs; // #filters p.filter_conf
 
 // the value we push into the hash
 let sethash = '';
@@ -34,6 +35,25 @@ RegExp.escape = s => s.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
 
 // timeout id to delay search update
 let updateSearchTimeoutId = 0;
+// Ensure the CSS --scrollbar-width matches the actual platform scrollbar width
+function setScrollbarWidthCSSVar()
+{
+    const div = document.createElement('div');
+    div.style.width = '100px';
+    div.style.height = '100px';
+    div.style.overflow = 'scroll';
+    div.style.position = 'absolute';
+    div.style.top = '-9999px';
+    document.body.appendChild(div);
+    const scrollbarWidth = div.offsetWidth - div.clientWidth;
+    document.body.removeChild(div);
+    document.documentElement.style.setProperty('--scrollbar-width', scrollbarWidth + 'px');
+}
+
+// Initialize and keep in sync on resize (covers overlay scrollbar changes)
+setScrollbarWidthCSSVar();
+window.addEventListener('resize', setScrollbarWidthCSSVar);
+
 
 
 // Template elements that we can clone()
@@ -133,6 +153,12 @@ function makeTimelineLegend()
 	const box = document.getElementById('timeline_header');
 	while (box.hasChildNodes())
 		box.firstChild.remove();
+
+	// compute pixel scale to keep header aligned with scrollable body
+	const container = document.getElementById('timeline_container');
+	const usableWidthPx = container.clientWidth - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--scrollbar-width'));
+	const totalMs = (timeline_max - timeline_zero);
+	timeline_scale_px = usableWidthPx / totalMs; // px per ms
 
 	const months = document.createElement('p');
 	months.id = 'months';
@@ -339,18 +365,7 @@ function onSuggestionClick()
 }
 
 
-function makeSelectedItem(row)
-{
-	const item = document.createElement('span');
-	item.textContent = row[confIdx];
-	item.title = row[titleIdx];
-
-	const opt = Array.from(form.querySelector('select[name="conf"]').options).find(opt => opt.value === row[confIdx]);
-	item.onclick = () => { opt.selected = false; opt.parentNode.onchange(); }
-
-	// insert at N-2
-	filtered_confs.insertBefore(item, filtered_confs.lastChild.previousSibling);
-}
+// Removed makeSelectedItem - no longer showing duplicate selected conferences above the list
 
 
 function hideSuggestions()
@@ -412,8 +427,6 @@ async function filterUpdated(search)
 	Array.from(timeline.children).filter(conf => conf.style.display !== 'none').forEach(conf => {
 		conf.style.display = 'none'
 	});
-	Array.from(filtered_confs.children).slice(0, timeline.children.length)
-		.filter(conf => conf.style.display !== 'none').forEach(conf => conf.style.display = 'none');
 
 	// Every filter needs to match at least one of its values
 	data.map((row, idx) =>
@@ -424,19 +437,9 @@ async function filterUpdated(search)
 	{
 		const show = Object.values(row_filters).every(val => val);
 		const tl_display = show ? 'block' : 'none';
-		const conf_display = row_filters[confIdx] === true ? 'inline-block' : 'none';
 
 		if (timeline.children[index].style.display !== tl_display)
 			timeline.children[index].style.display = tl_display;
-
-		if (filtered_confs.children[index].style.display !== conf_display)
-			filtered_confs.children[index].style.display = conf_display;
-
-		if (filtered_confs.children[index]) {
-			const conf_class = show ? '' : 'filtered-out';
-			if (filtered_confs.children[index].className !== conf_class)
-				filtered_confs.children[index].className = conf_class;
-		}
 	});
 }
 
@@ -574,12 +577,6 @@ function sortConferences(sortIdx = [subIdx, abstIdx, startIdx, endIdx], after = 
 	// Apply sort to timeline rows
 	const rowList = [...timeline.children];
 	sortdates.map(idx => rowList[idx]).forEach(row => timeline.appendChild(row));
-
-	// Apply sort to filtered conferences
-	const filterList = [...filtered_confs.children];
-	sortdates.map(idx => filterList[idx]).forEach(
-		conf => filtered_confs.insertBefore(conf, filtered_confs.lastChild.previousSibling)
-	);
 }
 
 function populatePage(json)
@@ -617,8 +614,19 @@ function populatePage(json)
 		...row.slice(cfpIdx).map(cfp => cfp[endIdx] || cfp[startIdx] || cfp[subIdx])
 	), mindate);
 
-	// get last day of month
-	timeline_max = Date.UTC(Math.floor(maxdate / 10000), Math.floor(maxdate / 100) % 100, 0);
+	// get last day of the same month as maxdate (month is 0-based for Date.UTC)
+	// previously used day=0 of the same month which resolves to the last day of previous month
+	// compute year and month from maxdate (YYYYMMDD), then request month+1 with day=0
+	const maxYear = Math.floor(maxdate / 10000);
+	const maxMonthOneBased = Math.floor(maxdate / 100) % 100; // 1..12
+	const maxMonthZero = maxMonthOneBased - 1; // 0..11
+	// Last day of the same month = next month with day 0
+	timeline_max = Date.UTC(maxYear, maxMonthZero + 1, 0);
+	// The above is equivalent to Date.UTC(maxYear, maxMonthZeroBased, 1) - 1, but avoids DST issues
+	// Save defaults for Reset
+	default_timeline_zero = timeline_zero;
+	default_timeline_max = timeline_max;
+	// Percentage scale used by existing layout; px scale computed in legend
 	timeline_scale = 100 / (timeline_max - timeline_zero);
 	date_max = new Date(timeline_max);
 
@@ -630,15 +638,12 @@ function populatePage(json)
 
 	const filters = document.getElementById('filters');
 	filters.appendChild(makeFilter(confIdx, "conf"));
-	filtered_confs = form.querySelector('p.filter_conf');
-
 	filters.appendChild(makeFilter(rankIdx, "rank", ranksort));
 	filters.appendChild(makeFilter(fieldIdx, "field"));
 
 	data.forEach((row, idx) =>
 	{
 		makeTimelineItem(row);
-		makeSelectedItem(row);
 	});
 
 	sortConferences();
@@ -652,6 +657,9 @@ function populatePage(json)
 	filterUpdated();
 
 	document.getElementById('loading').style.display = 'none';
+
+	// Initialize range controls
+	setupRangeControls();
 }
 
 function parsingErrors(content)
@@ -683,4 +691,85 @@ function fetchData(page, result_handler)
 	req.addEventListener('load', evt => result_handler(evt.target.responseText));
 	req.open('get', page);
 	req.send();
+}
+
+function yyyymmdd(date)
+{
+    return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, '0'),
+        String(date.getDate()).padStart(2, '0')
+    ].join('-');
+}
+
+function setupRangeControls()
+{
+    const startInput = document.getElementById('range_start');
+    const endInput = document.getElementById('range_end');
+    const applyBtn = document.getElementById('range_apply');
+    const resetBtn = document.getElementById('range_reset');
+
+    if (!startInput || !endInput || !applyBtn || !resetBtn)
+        return;
+
+    // Prefill inputs with current range
+    startInput.value = yyyymmdd(new Date(timeline_zero));
+    endInput.value = yyyymmdd(new Date(timeline_max));
+
+    applyBtn.onclick = () => {
+        // parse input dates; allow partial update
+        const startVal = startInput.value;
+        const endVal = endInput.value;
+
+        let newZero = timeline_zero;
+        let newMax = timeline_max;
+
+        if (startVal) {
+            const d = new Date(startVal + 'T00:00:00Z');
+            if (!isNaN(d)) newZero = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+        }
+        if (endVal) {
+            const d = new Date(endVal + 'T00:00:00Z');
+            if (!isNaN(d)) newMax = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+        }
+
+		if (newMax <= newZero)
+            return; // ignore invalid range silently
+
+		timeline_zero = newZero;
+		timeline_max = newMax;
+		date_zero = new Date(timeline_zero);
+		date_max = new Date(timeline_max);
+		timeline_scale = 100 / (timeline_max - timeline_zero);
+
+        // Re-render header and reposition items without changing DOM order
+		makeTimelineLegend();
+        Array.from(timeline.children).forEach(row => {
+            const blocks = row.querySelector('.timeblocks');
+            Array.from(blocks.children).forEach(span => {
+                // reposition using data from inline styles where possible
+                // We cannot recover original epoch dates from styles; instead, rebuild row via data
+            });
+        });
+		// Full re-render of timeline items to ensure precise placement
+		timeline.textContent = '';
+		data.forEach(row => makeTimelineItem(row));
+		filterUpdated();
+    };
+
+    resetBtn.onclick = () => {
+		if (default_timeline_zero != null && default_timeline_max != null) {
+            timeline_zero = default_timeline_zero;
+            timeline_max = default_timeline_max;
+			date_zero = new Date(timeline_zero);
+			date_max = new Date(timeline_max);
+            timeline_scale = 100 / (timeline_max - timeline_zero);
+            startInput.value = yyyymmdd(new Date(timeline_zero));
+            endInput.value = yyyymmdd(new Date(timeline_max));
+			makeTimelineLegend();
+			timeline.textContent = '';
+			data.forEach(row => makeTimelineItem(row));
+			filterUpdated();
+        }
+    };
 }
