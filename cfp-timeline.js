@@ -24,7 +24,7 @@ const form = document.querySelector('form');
 const filters = {};
 let data = [];
 
-let filtered_confs; // #search p.filter_conf
+let filtered_confs; // #filters p.filter_conf
 
 // the value we push into the hash
 let sethash = '';
@@ -453,7 +453,8 @@ function makeFilter(colIdx, name, sortfunction)
 	const select = p.appendChild(document.createElement('select'));
 	select.multiple = true;
 	select.name = name;
-	select.size = values.length;
+	// Limit Conference filter to show max 10 options for better UX
+	select.size = Math.min(values.length, name === 'conf' ? 10 : values.length);
 	select.setAttribute('column_id', colIdx);
 
 	const clear = p.appendChild(document.createElement('button'));
@@ -579,13 +580,6 @@ function sortConferences(sortIdx = [subIdx, abstIdx, startIdx, endIdx], after = 
 	sortdates.map(idx => filterList[idx]).forEach(
 		conf => filtered_confs.insertBefore(conf, filtered_confs.lastChild.previousSibling)
 	);
-
-	const suggestionsList = [...suggestions.children];
-	sortdates.map(idx => suggestionsList[idx]).forEach(
-		item => suggestions.appendChild(item)
-	);
-
-	onSuggestionClick();
 }
 
 function populatePage(json)
@@ -634,23 +628,16 @@ function populatePage(json)
 		document.createTextNode(` The last scraping took place on ${json['date']}.`)
 	);
 
-	document.getElementById('search').appendChild(makeFilter(confIdx, "conf"));
+	const filters = document.getElementById('filters');
+	filters.appendChild(makeFilter(confIdx, "conf"));
 	filtered_confs = form.querySelector('p.filter_conf');
 
-	const filters = document.getElementById('filters');
 	filters.appendChild(makeFilter(rankIdx, "rank", ranksort));
 	filters.appendChild(makeFilter(fieldIdx, "field"));
-
-	const search = form.querySelector('input[name="search"]');
-	search.onkeypress = updateSearch
-	search.onkeyup = updateSearch
-	search.onfocus = updateSearch
-	search.onblur = () => setTimeout(hideSuggestions, 100)
 
 	data.forEach((row, idx) =>
 	{
 		makeTimelineItem(row);
-		makeSuggestionItem(row);
 		makeSelectedItem(row);
 	});
 

@@ -85,14 +85,11 @@ body > *:not(#timeline_container) {
 	}
 }
 
-#filters, #search {
+#filters {
 	margin: 1em auto 0;
 	padding: 0px 2px 10px;
 	border: thin solid;
 	border-radius: 10px;
-}
-
-#filters {
 	display: flex;
 	flex-flow:row nowrap;
 	justify-content: space-around;
@@ -104,25 +101,8 @@ body > *:not(#timeline_container) {
 	text-align: center;
 }
 
-#search p,
 #suggestions {
-	margin: 0;
-	padding: 0 0 0 .5em;
-	width: calc(100% - 2em);
-}
-
-#search p input,
-#suggestions li {
-	margin: 0;
-	width: 100%;
-}
-
-#search {
-	position: relative;
-}
-
-#suggestions {
-	position: absolute;
+	display: none;
 }
 
 #suggestions li {
@@ -166,10 +146,13 @@ body > *:not(#timeline_container) {
 	max-height: 45ex;
 }
 
-#search p.filter_conf select {
-	display: none;
+#filters p.filter_conf select {
+	display: block;
 }
 
+#filters p.filter_conf::before {
+	content: "Conference";
+}
 #filters p.filter_rank::before {
 	content: "CORE/GGS Rankings";
 }
@@ -177,26 +160,11 @@ body > *:not(#timeline_container) {
 	content: "Field";
 }
 
-#search p.filter_conf span::after {
-	content: " ×";
-	color: grey;
+#filters p.filter_conf span {
+	display: none;
 }
 
-#search p.filter_conf span {
-	margin: 3px;
-	padding: 5px;
-	display: inline-block;
-	white-space: nowrap;
-	cursor: pointer;
-	border: black thin solid;
-	border-radius: 3px;
-}
-
-#search p.filter_conf span.filtered-out {
-	opacity: 0.4;
-}
-
-#search p.filter_conf button {
+#filters p.filter_conf button {
 	margin: 3px;
 }
 
