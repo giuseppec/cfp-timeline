@@ -151,7 +151,7 @@ class RequestWrapper:
 		"""
 		if cls.use_cache:
 			try:
-				with open(filename, 'r') as fh:
+				with open(filename, 'r', encoding='utf-8') as fh:
 					return bs4.BeautifulSoup(fh.read(), 'lxml')
 			except FileNotFoundError:
 				pass
@@ -160,7 +160,7 @@ class RequestWrapper:
 		r = requests.get(url, **kwargs)
 
 		if cls.use_cache:
-			with open(filename, 'w') as fh:
+			with open(filename, 'w', encoding='utf-8') as fh:
 				print(r.text, file=fh)
 
 		return bs4.BeautifulSoup(r.text, 'lxml')
@@ -1294,6 +1294,199 @@ class WikicfpCFP(CallForPapers):
 		return attr.startswith('xmlns:') and ('rdf.data-vocabulary.org' in tag[attr] or 'purl.org/dc/' in tag[attr])
 
 
+	@classmethod
+	def _is_placeholder(cls, value: str | datetime.date | None) -> bool:
+		""" Check if a value is a placeholder or missing """
+		if value is None or (isinstance(value, str) and not value.strip()):
+			return True
+		if isinstance(value, str):
+			value_upper = value.upper().strip()
+			return value_upper in {'TBD', 'TBA', 'N/A', 'N.A.', '-', '—', 'TO BE ANNOUNCED', 'TO BE DETERMINED'}
+		return False
+
+
+	@classmethod
+	def _parse_date_from_text(cls, text: str, year: int) -> datetime.date | None:
+		""" Extract a date from free text, accounting for various formats """
+		if not text or cls._is_placeholder(text):
+			return None
+
+		# Common date patterns
+		patterns = [
+			# ISO: 2025-03-15
+			r'\b(\d{4})-(\d{2})-(\d{2})\b',
+			# US: March 15, 2025 or Mar 15, 2025
+			r'\b([A-Za-z]{3,9})\s+(\d{1,2}),?\s+(\d{4})\b',
+			# US: 03/15/2025
+			r'\b(\d{1,2})/(\d{1,2})/(\d{4})\b',
+			# European: 15/03/2025
+			r'\b(\d{1,2})/(\d{1,2})/(\d{4})\b',
+			# Without year: March 15
+			r'\b([A-Za-z]{3,9})\s+(\d{1,2})\b',
+			# Day Month Year (various formats)
+			r'\b(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})\b',
+		]
+
+		months = {
+			'january': 1, 'jan': 1, 'february': 2, 'feb': 2,
+			'march': 3, 'mar': 3, 'april': 4, 'apr': 4,
+			'may': 5, 'june': 6, 'jun': 6, 'july': 7, 'jul': 7,
+			'august': 8, 'aug': 8, 'september': 9, 'sep': 9, 'sept': 9,
+			'october': 10, 'oct': 10, 'november': 11, 'nov': 11,
+			'december': 12, 'dec': 12,
+		}
+
+		for pattern in patterns:
+			for match in re.finditer(pattern, text, re.IGNORECASE):
+				groups = match.groups()
+				try:
+					if len(groups) == 3:
+						# Full date with year
+						if groups[2].isdigit():
+							yr = int(groups[2])
+							if groups[0].isdigit() and groups[1].isdigit():
+								# ISO or slash format
+								m, d = int(groups[1]), int(groups[0])
+								if 1 <= m <= 12 and 1 <= d <= 31:
+									return datetime.date(yr, m, d)
+							elif groups[0].lower() in months:
+								# Month name format
+								m = months[groups[0].lower()]
+								d = int(groups[1])
+								if 1 <= d <= 31:
+									return datetime.date(yr, m, d)
+					elif len(groups) == 2 and groups[1] not in months:
+						# m/d format
+						m, d = int(groups[0]), int(groups[1])
+						if 1 <= m <= 12 and 1 <= d <= 31:
+							return datetime.date(year, m, d)
+					elif len(groups) == 2 and groups[0].lower() in months:
+						# Month Day format
+						m = months[groups[0].lower()]
+						d = int(groups[1])
+						if 1 <= d <= 31:
+							return datetime.date(year, m, d)
+				except (ValueError, KeyError):
+					continue
+
+		return None
+
+
+	def _extract_dates_from_text(self, soup: bs4.BeautifulSoup):
+		""" Extract dates from free text when structured metadata is missing """
+		# Get all text from the page
+		text = soup.get_text(separator=' ', strip=True)
+
+		# Mapping of keywords to date fields
+		field_patterns = {
+			'abstract': [
+				r'abstract(?:\s+registration)?(?:\s+due|deadline|submission)?',
+				r'abstractions?\s+due',
+				r'abstract\s+deadline',
+			],
+			'submission': [
+				r'(?:paper|full\s+paper)?\s+submission(?:\s+deadline|due)',
+				r'submission\s+deadline',
+				r'full\s+paper\s+due',
+				r'final\s+submission',
+			],
+			'notification': [
+				r'notification(?:\s+of\s+acceptance)?',
+				r'author\s+notification',
+				r'decision\s+notification',
+				r'accepted\s+papers?\s+notification',
+			],
+			'camera_ready': [
+				r'camera[\s-]?ready',
+				r'final\s+version\s+due',
+				r'final\s+paper\s+due',
+				r'camera[\s-]?ready\s+deadline',
+			],
+			'conf_start': [
+				r'conference\s+(?:will\s+be\s+held|dates?|date|takes?\s+place)',
+				r'event\s+dates?',
+			],
+			'conf_end': [
+				r'conference\s+ends?',
+			],
+		}
+
+		# First, handle conference date ranges specially
+		conf_range_patterns = [
+			r'conference\s+(?:dates?|date|will\s+be\s+held)\s*:?\s*([A-Za-z]+)\s+(\d{1,2})[–\-]\s*(\d{1,2}),\s*(\d{4})',
+			r'conference\s+(?:dates?|date|will\s+be\s+held)\s*:?\s*([A-Za-z]+)\s+(\d{1,2})\s+to\s+([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})',
+			r'(\d{1,2})[–\-]\s*(\d{1,2}),?\s+([A-Za-z]+)\s+(\d{4})',  # 10-14, March 2025
+		]
+
+		months = {
+			'january': 1, 'jan': 1, 'february': 2, 'feb': 2,
+			'march': 3, 'mar': 3, 'april': 4, 'apr': 4,
+			'may': 5, 'june': 6, 'jun': 6, 'july': 7, 'jul': 7,
+			'august': 8, 'aug': 8, 'september': 9, 'sep': 9, 'sept': 9,
+			'october': 10, 'oct': 10, 'november': 11, 'nov': 11,
+			'december': 12, 'dec': 12,
+		}
+
+		for pattern in conf_range_patterns:
+			for match in re.finditer(pattern, text, re.IGNORECASE):
+				groups = match.groups()
+				try:
+					if len(groups) == 4:
+						# Case: "March 10–14, 2025"
+						if groups[0].lower() in months:
+							month = months[groups[0].lower()]
+							start_day = int(groups[1])
+							end_day = int(groups[2])
+							year = int(groups[3])
+							if 1 <= month <= 12 and 1 <= start_day <= 31 and 1 <= end_day <= 31:
+								if 'conf_start' not in self.dates or self._is_placeholder(self.dates.get('conf_start')):
+									self.dates['conf_start'] = datetime.date(year, month, start_day)
+									self.orig['conf_start'] = False
+								if 'conf_end' not in self.dates or self._is_placeholder(self.dates.get('conf_end')):
+									self.dates['conf_end'] = datetime.date(year, month, end_day)
+									self.orig['conf_end'] = False
+								break
+					elif len(groups) == 5:
+						# Case: "March 2 to March 5, 2025"
+						if groups[0].lower() in months and groups[2].lower() in months:
+							start_month = months[groups[0].lower()]
+							end_month = months[groups[2].lower()]
+							start_day = int(groups[1])
+							end_day = int(groups[3])
+							year = int(groups[4])
+							if 1 <= start_day <= 31 and 1 <= end_day <= 31:
+								if 'conf_start' not in self.dates or self._is_placeholder(self.dates.get('conf_start')):
+									self.dates['conf_start'] = datetime.date(year, start_month, start_day)
+									self.orig['conf_start'] = False
+								if 'conf_end' not in self.dates or self._is_placeholder(self.dates.get('conf_end')):
+									self.dates['conf_end'] = datetime.date(year, end_month, end_day)
+									self.orig['conf_end'] = False
+								break
+				except (ValueError, KeyError):
+					continue
+
+		# Extract dates for each field
+		for field, patterns in field_patterns.items():
+			if field in self.dates and not self._is_placeholder(self.dates[field]):
+				continue  # Already have a value
+
+			for pattern in patterns:
+				for match in re.finditer(pattern, text, re.IGNORECASE):
+					# Look for date within 150 characters after the match
+					context_end = match.end() + 150
+					context = text[match.start():context_end]
+					
+					# Try to extract a date from this context
+					date = self._parse_date_from_text(context, self.year)
+					if date:
+						self.dates[field] = date
+						self.orig[field] = False  # Mark as inferred
+						break
+				
+				if field in self.dates:
+					break
+
+
 	def _parse_cfp(self, soup: bs4.BeautifulSoup):
 		""" Given the BeautifulSoup of the CFP page, update self.dates and self.link
 
@@ -1326,12 +1519,18 @@ class WikicfpCFP(CallForPapers):
 			else:
 				print('Error: unexpected RDF or DC data: {}'.format(xt_data))
 
+		# First pass: populate from structured metadata
 		for f, name in zip(Dates.__slots__, self._date_names):
 			try:
-				self.dates[f] = metadata[name]
-				self.orig[f] = True
+				value = metadata[name]
+				if not self._is_placeholder(value):
+					self.dates[f] = value
+					self.orig[f] = True
 			except KeyError:
 				pass  # Missing date in data
+
+		# Second pass: extract from free text for missing/placeholder fields
+		self._extract_dates_from_text(soup)
 
 		# source is the URL, it's sometimes empty
 		if 'source' in metadata and metadata['source']:
