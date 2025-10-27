@@ -2,17 +2,25 @@ name: Update scraping
 
 on:
   schedule:
-    # 7am UTC = 9am CET, 3am EDT, 0am PDT − should be light hours globally for WikiCFP.
+    # 7am UTC = 9am CET, 3am EDT, 0am PDT
     - cron: '0 7 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write   # allow commit+push with GITHUB_TOKEN on this workflow
 
 jobs:
   update:
     name: Update scraping
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v1
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        # we want to be able to push back to the same repo
+        persist-credentials: false
+        fetch-depth: 0
 
     - name: Install dependencies
       run: |
@@ -29,10 +37,21 @@ jobs:
         (( $RANDOM < 32768 / 30 )) && python3 ./updater.py --no-cache ggs | cat
         python3 ./updater.py --no-cache --delay 2.5 cfps | cat
 
-    - name: Push to GitHub
-      run: |
-        git add core.csv cfp.json parsing_errors.txt
-        git commit -m "Update scraping $(date --rfc-3339=date)"
-        git push https://${TOKEN}@github.com/${GITHUB_REPOSITORY} HEAD:master
+    - name: Commit and push results
       env:
-        TOKEN: ${{ secrets.CORE_CFP_PUSHER }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPO: ${{ github.repository }}
+      run: |
+        # Stage files that may have changed
+        git add core.csv cfp.json parsing_errors.txt || true
+
+        # Commit if there is anything to commit (avoid failing on "nothing to commit")
+        if ! git diff --cached --quiet; then
+          git commit -m "Update scraping $(date --rfc-3339=date)"
+        fi
+
+        # Re-authenticate origin using the workflow token
+        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}
+
+        # Push HEAD to master (adjust 'master' -> 'main' if your default branch is main)
+        git push origin HEAD:master
