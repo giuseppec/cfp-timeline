@@ -1,127 +1,127 @@
-"acronym";"title";"ranksys";"rank";"field"
-"AAAI";"National Conference of the American Association for Artificial Intelligence";"CORE2023";"A*";"Artificial intelligence"
-"AAMAS";"International Joint Conference on Autonomous Agents and Multiagent Systems";"CORE2023";"A*";"Artificial intelligence"
-"ACCV";"Asian Conference on Computer Vision";"CORE2023";"B";"Computer vision and multimedia computation"
-"ACIIDS";"Asian Conference on Intelligent Information and Database Systems";"CORE2023";"B";"Data management and data science"
-"ACIVS";"Advanced Concepts for Intelligent Vision Systems";"CORE2023";"B";"Computer vision and multimedia computation"
-"ACL";"Association for Computational Linguistics";"CORE2023";"A*";"Artificial intelligence"
-"ACMMM";"ACM Multimedia";"CORE2023";"A*";"Computer vision and multimedia computation"
-"AISTATS";"International Conference on Artificial Intelligence and Statistics";"CORE2023";"A";"Machine learning"
-"ALT";"Algorithmic Learning Theory";"CORE2023";"B";"Machine learning"
-"ASONAM";"IEEE/ACM International Conference on Advances in Social Networks Analysis and Mining";"CORE2023";"B";"Data management and data science"
-"AVSS";"IEEE International Conference on Advanced Video and Signal Based Surveillance";"CORE2023";"B";"Computer vision and multimedia computation"
-"BMVC";"British Machine Vision Conference";"CORE2023";"A";"Computer vision and multimedia computation"
-"BigData";"IEEE International Conference on Big Data";"CORE2023";"B";"Data management and data science"
-"CADE";"International Conference on Automated Deduction";"CORE2023";"A";"Artificial intelligence"
-"CEC";"IEEE Congress on Evolutionary Computation";"CORE2023";"B";"Artificial intelligence"
-"CIDR";"Conference on Innovative Data Systems Research";"CORE2023";"A";"Data management and data science"
-"CIKM";"ACM International Conference on Information and Knowledge Management";"CORE2023";"A";"Data management and data science"
-"COLING";"International Conference on Computational Linguistics";"CORE2023";"B";"Artificial intelligence"
-"COLT";"Conference on Learning Theory";"CORE2023";"A*";"Machine learning"
-"CP";"International Conference on Principles and Practice of Constraint Programming";"CORE2023";"A";"Artificial intelligence"
-"CPAIOR";"International Conference on Integration of Artificial Intelligence and Operations Research Techniques in Constraint Programming for Combinatorial Optimization Problems";"CORE2023";"B";"Artificial intelligence"
-"CPM";"Combinatorial Pattern Matching";"CORE2023";"B";"Computer vision and multimedia computation"
-"CVPR";"IEEE Conference on Computer Vision and Pattern Recognition";"CORE2023";"A*";"Computer vision and multimedia computation"
-"CaiSE";"International Conference on Advanced Information Systems Engineering";"CORE2023";"A";"Data management and data science"
-"CoNLL";"Conference on Computational Natural Language Learning";"CORE2023";"B";"Artificial intelligence"
-"CogSci";"Annual Meeting of the Cognitive Science Society";"CORE2023";"B";"Artificial intelligence"
-"DAS";"International Workshop on Document Analysis Systems";"CORE2023";"B";"Data management and data science"
-"DASFAA";"International Conference on Database Systems for Advanced Applications";"CORE2023";"B";"Data management and data science"
-"DCC";"Data Compression Conference";"CORE2023";"B";"Data management and data science"
-"DS";"Discovery Science";"CORE2023";"B";"Machine learning"
-"DSAA";"IEEE International Conference on Data Science and Advanced Analytics";"CORE2023";"B";"Data management and data science"
-"DaWaK";"Data Warehousing and Knowledge Discovery";"CORE2023";"B";"Data management and data science"
-"DocEng";"ACM Symposium on Document Engineering";"CORE2023";"B";"Data management and data science"
-"EACL";"European Association for Computational Linguistics";"CORE2023";"A";"Artificial intelligence"
-"EC";"ACM Conference on Economics and Computation";"CORE2023";"A*";"Artificial intelligence"
-"ECAI";"European Conference on Artificial Intelligence";"CORE2023";"A";"Artificial intelligence"
-"ECCV";"European Conference on Computer Vision";"CORE2023";"A*";"Computer vision and multimedia computation"
-"ECIR";"European Conference on Information Retrieval";"CORE2023";"A";"Data management and data science"
-"ECML PKDD";"European Conference on Machine Learning and Principles and Practice of Knowledge Discovery in Database";"CORE2023";"A";"Machine learning"
-"EDBT";"Extending Database Technology";"CORE2023";"A";"Data management and data science"
-"EKAW";"International Conference on Knowledge Engineering and Knowledge Management";"CORE2023";"B";"Data management and data science"
-"EMAS";"EMAS";"CORE2023";"B";"Artificial intelligence"
-"EMNLP";"Empirical Methods in Natural Language Processing";"CORE2023";"A*";"Artificial intelligence"
-"ER";"International Conference on Conceptual Modelling";"CORE2023";"A";"Data management and data science"
-"ESANN";"European Symposium on Artificial Neural Networks";"CORE2023";"B";"Machine learning"
-"ESWC";"Extended Semantic Web Conference";"CORE2023";"B";"Data management and data science"
-"EUROGP";"European Conference on Genetic Programming";"CORE2023";"B";"Artificial intelligence"
-"EvoApplications";"International Conference on Applications of Evolutionary Computation";"CORE2023";"B";"Artificial intelligence"
-"EvoCOP";"European Conference on Evolutionary Computation in Combinatorial Optimisation";"CORE2023";"B";"Artificial intelligence"
-"FAST";"Conference on File and Storage Technologies";"CORE2023";"A";"Data management and data science"
-"FG";"IEEE International Conference on Automatic Face and Gesture Recognition";"CORE2023";"B";"Computer vision and multimedia computation"
-"FOGA";"Foundations of Genetic Algorithms";"CORE2023";"A";"Artificial intelligence"
-"FOIS";"International Conference on Formal Ontology in Information Systems";"CORE2023";"B";"Artificial intelligence"
-"FSR";"International Conference on Field and Service Robotics";"CORE2018";"A";"Artificial intelligence"
-"FUZZ-IEEE";"IEEE International Conference on Fuzzy Systems";"CORE2023";"B";"Artificial intelligence"
-"GECCO";"Genetic and Evolutionary Computations";"CORE2023";"A";"Artificial intelligence"
-"ICAART";"International Conference on Agents and Artificial Intelligence";"CORE2023";"B";"Artificial intelligence"
-"ICAPS";"International Conference on Automated Planning and Scheduling";"CORE2023";"A*";"Artificial intelligence"
-"ICASSP";"IEEE International Conference on Acoustics, Speech and Signal Processing";"CORE2023";"B";"Computer vision and multimedia computation"
-"ICCCI";"International Conference on Computational Collective Intelligence";"CORE2023";"B";"Artificial intelligence"
-"ICCV";"IEEE International Conference on Computer Vision";"CORE2023";"A*";"Computer vision and multimedia computation"
-"ICDAR";"IEEE International Conference on Document Analysis and Recognition";"CORE2023";"A";"Data management and data science"
-"ICDE";"International Conference on Data Engineering";"CORE2023";"A*";"Data management and data science"
-"ICDM";"IEEE International Conference on Data Mining";"CORE2023";"A*";"Data management and data science"
-"ICDT";"International Conference on Database Theory";"CORE2023";"A";"Data management and data science"
-"ICFHR";"International Conference on Frontiers of Handwriting Recognition";"CORE2023";"B";"Computer vision and multimedia computation"
-"ICIP";"IEEE International Conference on Image Processing";"CORE2023";"B";"Computer vision and multimedia computation"
-"ICLR";"International Conference on Learning Representations";"CORE2023";"A*";"Machine learning"
-"ICME";"IEEE International Conference on Multimedia and Expo";"CORE2023";"A";"Computer vision and multimedia computation"
-"ICML";"International Conference on Machine Learning";"CORE2023";"A*";"Machine learning"
-"ICMR";"International Conference on Multimedia Retrieval";"CORE2023";"B";"Computer vision and multimedia computation"
-"ICONIP";"International Conference on Neural Information Processing";"CORE2023";"B";"Machine learning"
-"ICPM";"International Conference on Process Mining";"CORE2023";"B";"Data management and data science"
-"ICPR";"International Conference on Pattern Recognition";"CORE2023";"B";"Computer vision and multimedia computation"
-"ICRA";"IEEE International Conference on Robotics and Automation";"CORE2023";"A*";"Artificial intelligence"
-"ICTAI";"International Conference on Tools with Artificial Intelligence";"CORE2023";"B";"Artificial intelligence"
-"ICWE";"International Conference on Web Engineering";"CORE2023";"B";"Data management and data science"
-"IDA";"Intelligent Data Analysis";"CORE2023";"B";"Data management and data science"
-"IE";"The International Conference on Intelligent Environments";"CORE2023";"B";"Artificial intelligence"
-"IJCAI";"International Joint Conference on Artificial Intelligence";"CORE2023";"A*";"Artificial intelligence"
-"IJCAR";"International Joint Conference on Automated Reasoning";"CORE2023";"A";"Artificial intelligence"
-"IJCB";"International Joint Conference on Biometrics";"CORE2023";"B";"Computer vision and multimedia computation"
-"IJCNLP";"International Joint Conference on Natural Language Processing";"CORE2023";"B";"Artificial intelligence"
-"IJCNN";"IEEE International Joint Conference on Neural Networks";"CORE2023";"B";"Machine learning"
-"INLG";"International Natural Language Generation Conference";"CORE2023";"B";"Artificial intelligence"
-"IROS";"IEEE/RSJ International Conference on Intelligent Robots and Systems";"CORE2023";"A";"Artificial intelligence"
-"ISWC";"International Semantic Web Conference";"CORE2023";"A";"Data management and data science"
-"IV";"Intelligent Vehicles Conference";"CORE2023";"B";"Artificial intelligence"
-"IVA";"Intelligent Virtual Agents";"CORE2023";"B";"Artificial intelligence"
-"Interspeech";"Interspeech";"CORE2023";"A";"Artificial intelligence"
-"K-CAP";"Knowledge capture";"CORE2023";"B";"Data management and data science"
-"KDD";"ACM International Conference on Knowledge Discovery and Data Mining";"CORE2023";"A*";"Data management and data science"
-"KES";"International Conference on Knowledge-Based and Intelligent Information and Engineering Systems";"CORE2023";"B";"Artificial intelligence"
-"KR";"International Conference on the Principles of Knowledge Representation and Reasoning";"CORE2023";"A*";"Artificial intelligence"
-"LPNMR";"International Conference on Logic Programming and Non-monotonic Reasoning";"CORE2023";"B";"Artificial intelligence"
-"LREC";"Language Resources and Evaluation Conference";"CORE2023";"B";"Artificial intelligence"
-"M2VIP";"Mechatronics and Machine Vision in Practice";"CORE2018";"B";"Machine learning"
-"MDAI";"International Conference on Modelling Decisions for Artificial Intelligence";"CORE2023";"B";"Artificial intelligence"
-"MDM";"International Conference on Mobile Data Management";"CORE2023";"B";"Data management and data science"
-"MMM";"International Conference on Multimedia Modelling";"CORE2023";"B";"Computer vision and multimedia computation"
-"NAACL";"North American Association for Computational Linguistics";"CORE2023";"A";"Artificial intelligence"
-"NeurIPS";"Advances in Neural Information Processing Systems";"CORE2023";"A*";"Machine learning"
-"PAKDD";"Pacific-Asia Conference on Knowledge Discovery and Data Mining";"CORE2023";"B";"Data management and data science"
-"PODS";"ACM SIGMOD-SIGACT-SIGART Conference on Principles of Database Systems";"CORE2023";"A*";"Data management and data science"
-"PPSN";"Parallel Problem Solving from Nature";"CORE2023";"A";"Machine learning"
-"PRICAI";"Pacific Rim International Conference on Artificial Intelligence";"CORE2023";"B";"Artificial intelligence"
-"PRIMA";"International Conference on Principles of Practice in Multi-Agent Systems";"CORE2023";"B";"Artificial intelligence"
-"RSS";"Robotics: Science and Systems";"CORE2018";"A*";"Machine learning"
-"RecSys";"ACM International Conference on Recommender Systems";"CORE2023";"A";"Data management and data science"
-"RuleML+RR";"International Joint Conference on Rules and Reasoning";"CORE2023";"B";"Artificial intelligence"
-"SAT";"International Conference on Theory and Applications of Satisfiability Testing";"CORE2023";"A";"Artificial intelligence"
-"SDM";"SIAM International Conference on Data Mining";"CORE2023";"A";"Data management and data science"
-"SIGIR";"ACM International Conference on Research and Development in Information Retrieval";"CORE2023";"A*";"Data management and data science"
-"SIGMOD";"ACM Special Interest Group on Management of Data Conference";"CORE2023";"A*";"Data management and data science"
-"SIGdial";"Annual Meeting of the Special Interest Group on Discourse and Dialog";"CORE2023";"B";"Artificial intelligence"
-"SISAP";"International Conference on Similarity Search and Applications";"CORE2023";"B";"Data management and data science"
-"SSDBM";"International Conference on Scientific and Statistical Data Base Management";"CORE2023";"B";"Data management and data science"
-"SSPR";"Structural and Syntactical Pattern Recognition";"CORE2023";"B";"Computer vision and multimedia computation"
-"SoCS";"The Symposium of Combinatorial Search";"CORE2023";"B";"Artificial intelligence"
-"TPDL";"International Conference on Theory and Practice of Digital Libraries";"CORE2023";"B";"Data management and data science"
-"UAI";"Conference in Uncertainty in Artificial Intelligence";"CORE2023";"A";"Artificial intelligence"
-"VLDB";"International Conference on Very Large Databases";"CORE2023";"A*";"Data management and data science"
-"WACV";"IEEE Workshop on Applications of Computer Vision";"CORE2023";"A";"Computer vision and multimedia computation"
-"WI";"IEEE/WIC/ACM International Conference on Web Intelligence";"CORE2023";"B";"Artificial intelligence"
-"WISE";"International Conference on Web Information Systems Engineering";"CORE2023";"B";"Data management and data science"
-"WSDM";"ACM International Conference on Web Search and Data Mining";"CORE2023";"A";"Data management and data science"
+acronym;title;ranksys;rank;field;gs_publication;gs_query_used;gs_match_stage;h5_index;h5_median;gs_smilarity
+AAAI;National Conference of the American Association for Artificial Intelligence;CORE2023;A*;Artificial intelligence;AAAI Conference on Artificial Intelligence;AAAI;ACRONYM MATCH;232;358;0.683761
+AAMAS;International Joint Conference on Autonomous Agents and Multiagent Systems;CORE2023;A*;Artificial intelligence;International Conference on Autonomous Agents and Multiagent Systems;conference autonomous agents multiagent systems;FALLBACK 2 WORDS REMOVED MATCH;54;78;0.957746
+ACCV;Asian Conference on Computer Vision;CORE2023;B;Computer vision and multimedia computation;Asian Conference on Computer Vision (ACCV);asian conference computer vision;MATCH;52;81;0.933333
+ACIIDS;Asian Conference on Intelligent Information and Database Systems;CORE2023;B;Data management and data science;Asian Conference on Intelligent Information and Database Systems;asian conference intelligent information database systems;MATCH;19;25;1.000000
+ACIVS;Advanced Concepts for Intelligent Vision Systems;CORE2023;B;Computer vision and multimedia computation;NA;NA;NO MATCH;NA;NA;NA
+ACL;Association for Computational Linguistics;CORE2023;A*;Artificial intelligence;Society for Computation in Linguistics;association computational linguistics;MATCH;19;29;0.835443
+ACMMM;ACM Multimedia;CORE2023;A*;Computer vision and multimedia computation;NA;NA;NO MATCH;NA;NA;NA
+AISTATS;International Conference on Artificial Intelligence and Statistics;CORE2023;A;Machine learning;International Conference on Artificial Intelligence and Statistics;international conference artificial intelligence statistics;MATCH;101;156;1.000000
+ALT;Algorithmic Learning Theory;CORE2023;B;Machine learning;Algorithmic Learning Theory (ALT);algorithmic learning theory;MATCH;33;64;0.931034
+ASONAM;IEEE/ACM International Conference on Advances in Social Networks Analysis and Mining;CORE2023;B;Data management and data science;International Conference on Advances in Social Networks Analysis and Mining;international conference advances social networks analysis mining;FALLBACK 2 WORDS REMOVED MATCH;24;36;0.943396
+AVSS;IEEE International Conference on Advanced Video and Signal Based Surveillance;CORE2023;B;Computer vision and multimedia computation;IEEE International Conference on Advanced Video and Signal-Based Surveillance (AVSS);ieee international conference advanced video signal based surveillance;MATCH;13;22;0.968553
+BMVC;British Machine Vision Conference;CORE2023;A;Computer vision and multimedia computation;British Machine Vision Conference (BMVC);british machine vision conference;MATCH;57;96;0.929577
+BigData;IEEE International Conference on Big Data;CORE2023;B;Data management and data science;IEEE International Conference on Big Data;ieee international conference big data;MATCH;55;89;1.000000
+CADE;International Conference on Automated Deduction;CORE2023;A;Artificial intelligence;International Conference on Automated Deduction;international conference automated deduction;MATCH;24;37;1.000000
+CEC;IEEE Congress on Evolutionary Computation;CORE2023;B;Artificial intelligence;IEEE Congress on Evolutionary Computation;ieee congress evolutionary computation;MATCH;94;137;1.000000
+CIDR;Conference on Innovative Data Systems Research;CORE2023;A;Data management and data science;Conference on Innovative Data system Research (CIDR);conference innovative data systems research;MATCH;36;50;0.937500
+CIKM;ACM International Conference on Information and Knowledge Management;CORE2023;A;Data management and data science;ACM International Conference on Information and Knowledge Management;acm international conference information knowledge management;MATCH;96;155;1.000000
+COLING;International Conference on Computational Linguistics;CORE2023;B;Artificial intelligence;International Conference on Computational Linguistics (COLING);international conference computational linguistics;MATCH;81;122;0.938053
+COLT;Conference on Learning Theory;CORE2023;A*;Machine learning;Conference on Learning Theory (COLT);conference learning theory;MATCH;74;112;0.920635
+CP;International Conference on Principles and Practice of Constraint Programming;CORE2023;A;Artificial intelligence;International Conference on Principles and Practice of Constraint Programming;international conference principles practice constraint programming;MATCH;20;31;1.000000
+CPAIOR;International Conference on Integration of Artificial Intelligence and Operations Research Techniques in Constraint Programming for Combinatorial Optimization Problems;CORE2023;B;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+CPM;Combinatorial Pattern Matching;CORE2023;B;Computer vision and multimedia computation;Combinatorial Pattern Matching (CPM);combinatorial pattern matching;MATCH;13;18;0.937500
+CVPR;IEEE Conference on Computer Vision and Pattern Recognition;CORE2023;A*;Computer vision and multimedia computation;IEEE/CVF Conference on Computer Vision and Pattern Recognition;ieee conference computer vision pattern recognition;MATCH;450;702;0.966667
+CaiSE;International Conference on Advanced Information Systems Engineering;CORE2023;A;Data management and data science;International Conference on Advanced Information Systems Engineering;international conference advanced information systems engineering;MATCH;24;44;1.000000
+CoNLL;Conference on Computational Natural Language Learning;CORE2023;B;Artificial intelligence;Conference on Computational Natural Language Learning (CoNLL);conference computational natural language learning;MATCH;30;47;0.946429
+CogSci;Annual Meeting of the Cognitive Science Society;CORE2023;B;Artificial intelligence;Annual Meeting of the Cognitive Science Society;annual meeting cognitive science society;MATCH;36;44;1.000000
+DAS;International Workshop on Document Analysis Systems;CORE2023;B;Data management and data science;International Conference on Document Analysis and Recognition;international workshop document analysis;FALLBACK 1 WORD REMOVED MATCH;30;49;0.696429
+DASFAA;International Conference on Database Systems for Advanced Applications;CORE2023;B;Data management and data science;International Conference on Database Systems for Advanced Applications;international conference database systems advanced applications;MATCH;23;32;1.000000
+DCC;Data Compression Conference;CORE2023;B;Data management and data science;Data Compression Conference, DCC;data compression conference;MATCH;21;32;0.931034
+DS;Discovery Science;CORE2023;B;Machine learning;Discovery Science;discovery science;MATCH;18;25;1.000000
+DSAA;IEEE International Conference on Data Science and Advanced Analytics;CORE2023;B;Data management and data science;IEEE International Conference on Data Science and Advanced Analytics (DSAA);ieee international conference data science advanced analytics;MATCH;27;38;0.964539
+DaWaK;Data Warehousing and Knowledge Discovery;CORE2023;B;Data management and data science;Data Warehousing and Knowledge Discovery (DaWaK);data warehousing knowledge discovery;MATCH;13;17;0.930233
+DocEng;ACM Symposium on Document Engineering;CORE2023;B;Data management and data science;ACM Symposium on Document Engineering;acm symposium document engineering;MATCH;14;20;1.000000
+EACL;European Association for Computational Linguistics;CORE2023;A;Artificial intelligence;Conference of the European Chapter of the Association for Computational Linguistics (EACL);european association computational linguistics;MATCH;77;128;0.724638
+EC;ACM Conference on Economics and Computation;CORE2023;A*;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+ECAI;European Conference on Artificial Intelligence;CORE2023;A;Artificial intelligence;European Conference on Artificial Intelligence (ECAI);european conference artificial intelligence;MATCH;44;83;0.948454
+ECCV;European Conference on Computer Vision;CORE2023;A*;Computer vision and multimedia computation;European Conference on Computer Vision;european conference computer vision;MATCH;262;417;1.000000
+ECIR;European Conference on Information Retrieval;CORE2023;A;Data management and data science;European Conference on Advances in Information Retrieval;european conference information retrieval;MATCH;47;71;0.880000
+ECML PKDD;European Conference on Machine Learning and Principles and Practice of Knowledge Discovery in Database;CORE2023;A;Machine learning;NA;NA;NO MATCH;NA;NA;NA
+EDBT;Extending Database Technology;CORE2023;A;Data management and data science;International Conference on Extending Database Technology (EDBT);extending database technology;MATCH;29;43;0.637363
+EKAW;International Conference on Knowledge Engineering and Knowledge Management;CORE2023;B;Data management and data science;International Joint Conference on Knowledge Discovery, Knowledge Engineering and Knowledge Management;international conference knowledge engineering knowledge management;MATCH;10;17;0.850575
+EMAS;EMAS;CORE2023;B;Artificial intelligence;EMAS;emas;MATCH;20;36;1.000000
+EMNLP;Empirical Methods in Natural Language Processing;CORE2023;A*;Artificial intelligence;Conference on Empirical Methods in Natural Language Processing (EMNLP);empirical methods natural language processing;MATCH;218;323;0.827586
+ER;International Conference on Conceptual Modelling;CORE2023;A;Data management and data science;International Conference on Conceptual Modeling;international conference conceptual modelling;MATCH;24;29;0.989474
+ESANN;European Symposium on Artificial Neural Networks;CORE2023;B;Machine learning;European Symposium on Artificial Neural Networks (ESANN);european symposium artificial neural networks;MATCH;17;31;0.941176
+ESWC;Extended Semantic Web Conference;CORE2023;B;Data management and data science;Extended Semantic Web Conference;extended semantic web conference;MATCH;31;44;1.000000
+EUROGP;European Conference on Genetic Programming;CORE2023;B;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+EvoApplications;International Conference on Applications of Evolutionary Computation;CORE2023;B;Artificial intelligence;International Conference on Applications of Evolutionary Computation;international conference applications evolutionary computation;MATCH;19;27;1.000000
+EvoCOP;European Conference on Evolutionary Computation in Combinatorial Optimisation;CORE2023;B;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+FAST;Conference on File and Storage Technologies;CORE2023;A;Data management and data science;Conference on File and Storage Technologies (FAST);conference file storage technologies;MATCH;40;67;0.945055
+FG;IEEE International Conference on Automatic Face and Gesture Recognition;CORE2023;B;Computer vision and multimedia computation;IEEE International Conference on Automatic Face & Gesture Recognition;ieee international conference automatic face gesture recognition;MATCH;40;60;0.971014
+FOGA;Foundations of Genetic Algorithms;CORE2023;A;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+FOIS;International Conference on Formal Ontology in Information Systems;CORE2023;B;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+FSR;International Conference on Field and Service Robotics;CORE2018;A;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+FUZZ-IEEE;IEEE International Conference on Fuzzy Systems;CORE2023;B;Artificial intelligence;IEEE International Conference on Fuzzy Systems (FUZZ);ieee international conference fuzzy systems;MATCH;25;34;0.948454
+GECCO;Genetic and Evolutionary Computations;CORE2023;A;Artificial intelligence;Conference on Genetic and Evolutionary Computation;genetic evolutionary computations;MATCH;49;65;0.827586
+ICAART;International Conference on Agents and Artificial Intelligence;CORE2023;B;Artificial intelligence;International Conference on Agents and Artificial Intelligence (ICAART);international conference agents artificial intelligence;MATCH;24;30;0.946565
+ICAPS;International Conference on Automated Planning and Scheduling;CORE2023;A*;Artificial intelligence;International Conference on Automated Planning and Scheduling (ICAPS);international conference automated planning scheduling;MATCH;33;55;0.953125
+ICASSP;IEEE International Conference on Acoustics, Speech and Signal Processing;CORE2023;B;Computer vision and multimedia computation;IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP);ieee international conference acoustics speech signal processing;MATCH;137;203;0.953020
+ICCCI;International Conference on Computational Collective Intelligence;CORE2023;B;Artificial intelligence;International Conference on Computational Collective Intelligence (ICCCI);international conference computational collective intelligence;MATCH;14;18;0.955882
+ICCV;IEEE International Conference on Computer Vision;CORE2023;A*;Computer vision and multimedia computation;IEEE/CVF International Conference on Computer Vision;ieee international conference computer vision;MATCH;256;412;0.960000
+ICDAR;IEEE International Conference on Document Analysis and Recognition;CORE2023;A;Data management and data science;International Conference on Document Analysis and Recognition;international conference document analysis recognition;FALLBACK 1 WORD REMOVED MATCH;30;49;0.960630
+ICDE;International Conference on Data Engineering;CORE2023;A*;Data management and data science;International Conference on Data Engineering;international conference data engineering;MATCH;82;104;1.000000
+ICDM;IEEE International Conference on Data Mining;CORE2023;A*;Data management and data science;IEEE International Conference on Data Mining;ieee international conference data mining;MATCH;49;86;1.000000
+ICDT;International Conference on Database Theory;CORE2023;A;Data management and data science;International Conference on Database Theory;international conference database theory;MATCH;19;28;1.000000
+ICFHR;International Conference on Frontiers of Handwriting Recognition;CORE2023;B;Computer vision and multimedia computation;NA;NA;NO MATCH;NA;NA;NA
+ICIP;IEEE International Conference on Image Processing;CORE2023;B;Computer vision and multimedia computation;IEEE International Conference on Image Processing (ICIP);ieee international conference image processing;MATCH;55;89;0.951456
+ICLR;International Conference on Learning Representations;CORE2023;A*;Machine learning;International Conference on Learning Representations;international conference learning representations;MATCH;362;652;1.000000
+ICME;IEEE International Conference on Multimedia and Expo;CORE2023;A;Computer vision and multimedia computation;IEEE International Conference on Multimedia and Expo;ieee international conference multimedia expo;MATCH;50;68;1.000000
+ICML;International Conference on Machine Learning;CORE2023;A*;Machine learning;International Conference on Machine Learning;international conference machine learning;MATCH;272;471;1.000000
+ICMR;International Conference on Multimedia Retrieval;CORE2023;B;Computer vision and multimedia computation;ACM International Conference on Multimedia Retrieval;international conference multimedia retrieval;MATCH;33;53;0.960000
+ICONIP;International Conference on Neural Information Processing;CORE2023;B;Machine learning;International Conference on Neural Information Processing;international conference neural information processing;MATCH;27;37;1.000000
+ICPM;International Conference on Process Mining;CORE2023;B;Data management and data science;International Conference on Data Stream Mining & Processing;international conference process mining;MATCH;17;26;0.767677
+ICPR;International Conference on Pattern Recognition;CORE2023;B;Computer vision and multimedia computation;International Conference on Pattern Recognition;international conference pattern recognition;MATCH;68;106;1.000000
+ICRA;IEEE International Conference on Robotics and Automation;CORE2023;A*;Artificial intelligence;IEEE International Conference on Robotics and Automation;ieee international conference robotics automation;MATCH;129;192;1.000000
+ICTAI;International Conference on Tools with Artificial Intelligence;CORE2023;B;Artificial intelligence;IEEE International Conference on Tools with Artificial Intelligence (ICTAI);international conference tools with artificial intelligence;MATCH;26;35;0.918519
+ICWE;International Conference on Web Engineering;CORE2023;B;Data management and data science;International Conference on Web Engineering (ICWE);international conference web engineering;MATCH;15;26;0.945055
+IDA;Intelligent Data Analysis;CORE2023;B;Data management and data science;Intelligent Data Analysis;intelligent data analysis;MATCH;19;28;1.000000
+IE;The International Conference on Intelligent Environments;CORE2023;B;Artificial intelligence;International Conference on Intelligent Environments;international conference intelligent environments;MATCH;15;25;0.962963
+IJCAI;International Joint Conference on Artificial Intelligence;CORE2023;A*;Artificial intelligence;International Joint Conference on Artificial Intelligence (IJCAI);international joint conference artificial intelligence;MATCH;136;207;0.950000
+IJCAR;International Joint Conference on Automated Reasoning;CORE2023;A;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+IJCB;International Joint Conference on Biometrics;CORE2023;B;Computer vision and multimedia computation;NA;NA;NO MATCH;NA;NA;NA
+IJCNLP;International Joint Conference on Natural Language Processing;CORE2023;B;Artificial intelligence;International Joint Conference on Natural Language Processing (IJCNLP);international joint conference natural language processing;MATCH;41;77;0.945736
+IJCNN;IEEE International Joint Conference on Neural Networks;CORE2023;B;Machine learning;International Joint Conference on Neural Networks;international joint conference neural networks;FALLBACK 1 WORD REMOVED MATCH;66;96;0.951456
+INLG;International Natural Language Generation Conference;CORE2023;B;Artificial intelligence;International Conference on Natural Language Generation;international natural language generation conference;MATCH;25;62;0.766355
+IROS;IEEE/RSJ International Conference on Intelligent Robots and Systems;CORE2023;A;Artificial intelligence;IEEE/RSJ International Conference on Intelligent Robots and Systems;ieee rsj international conference intelligent robots systems;MATCH;92;137;1.000000
+ISWC;International Semantic Web Conference;CORE2023;A;Data management and data science;International Semantic Web Conference;international semantic web conference;MATCH;36;59;1.000000
+IV;Intelligent Vehicles Conference;CORE2023;B;Artificial intelligence;IEEE Intelligent Vehicles Symposium;intelligent vehicles conference;MATCH;55;81;0.666667
+IVA;Intelligent Virtual Agents;CORE2023;B;Artificial intelligence;Intelligent Virtual Agents;intelligent virtual agents;MATCH;24;40;1.000000
+Interspeech;Interspeech;CORE2023;A;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+K-CAP;Knowledge capture;CORE2023;B;Data management and data science;NA;NA;NO MATCH;NA;NA;NA
+KDD;ACM International Conference on Knowledge Discovery and Data Mining;CORE2023;A*;Data management and data science;ACM SIGKDD Conference on Knowledge Discovery and Data Mining;conference knowledge discovery data mining;FALLBACK 2 WORDS REMOVED MATCH;124;212;0.866142
+KES;International Conference on Knowledge-Based and Intelligent Information and Engineering Systems;CORE2023;B;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+KR;International Conference on the Principles of Knowledge Representation and Reasoning;CORE2023;A*;Artificial intelligence;Principles of Knowledge Representation and Reasoning (KR);KR;ACRONYM MATCH;29;38;0.748201
+LPNMR;International Conference on Logic Programming and Non-monotonic Reasoning;CORE2023;B;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+LREC;Language Resources and Evaluation Conference;CORE2023;B;Artificial intelligence;International Conference on Language Resources and Evaluation (LREC);language resources evaluation conference;MATCH;68;108;0.672727
+M2VIP;Mechatronics and Machine Vision in Practice;CORE2018;B;Machine learning;International Conference on Mechatronics and Machine Vision in Practice;mechatronics machine vision practice;MATCH;9;12;0.754386
+MDAI;International Conference on Modelling Decisions for Artificial Intelligence;CORE2023;B;Artificial intelligence;Modeling Decisions for Artificial Intelligence;modelling decisions artificial intelligence;FALLBACK 2 WORDS REMOVED MATCH;9;11;0.760331
+MDM;International Conference on Mobile Data Management;CORE2023;B;Data management and data science;International Conference on Mobile Data Management;international conference mobile data management;MATCH;16;27;1.000000
+MMM;International Conference on Multimedia Modelling;CORE2023;B;Computer vision and multimedia computation;NA;NA;NO MATCH;NA;NA;NA
+NAACL;North American Association for Computational Linguistics;CORE2023;A;Artificial intelligence;Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (HLT-NAACL);north american association computational linguistics;MATCH;126;202;0.612022
+NeurIPS;Advances in Neural Information Processing Systems;CORE2023;A*;Machine learning;Neural Information Processing Systems;neural information processing systems;FALLBACK 1 WORD REMOVED MATCH;371;637;0.860465
+PAKDD;Pacific-Asia Conference on Knowledge Discovery and Data Mining;CORE2023;B;Data management and data science;Pacific-Asia Conference on Knowledge Discovery and Data Mining (PAKDD);pacific asia conference knowledge discovery data mining;MATCH;33;49;0.953846
+PODS;ACM SIGMOD-SIGACT-SIGART Conference on Principles of Database Systems;CORE2023;A*;Data management and data science;NA;NA;NO MATCH;NA;NA;NA
+PPSN;Parallel Problem Solving from Nature;CORE2023;A;Machine learning;International Conference on Parallel Problem Solving from Nature;parallel problem solving from nature;MATCH;22;41;0.720000
+PRICAI;Pacific Rim International Conference on Artificial Intelligence;CORE2023;B;Artificial intelligence;Pacific Rim International Conference on Artificial Intelligence (PRICAI);pacific rim international conference artificial intelligence;MATCH;14;19;0.947368
+PRIMA;International Conference on Principles of Practice in Multi-Agent Systems;CORE2023;B;Artificial intelligence;Pacific Rim International Conference on Multi-Agents (PRIMA);PRIMA;ACRONYM MATCH;8;9;0.625954
+RSS;Robotics: Science and Systems;CORE2018;A*;Machine learning;Robotics: Science and Systems;robotics science systems;MATCH;83;129;1.000000
+RecSys;ACM International Conference on Recommender Systems;CORE2023;A;Data management and data science;NA;NA;NO MATCH;NA;NA;NA
+RuleML+RR;International Joint Conference on Rules and Reasoning;CORE2023;B;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+SAT;International Conference on Theory and Applications of Satisfiability Testing;CORE2023;A;Artificial intelligence;Theory and Applications of Satisfiability Testing;theory applications satisfiability testing;FALLBACK 2 WORDS REMOVED MATCH;20;28;0.777778
+SDM;SIAM International Conference on Data Mining;CORE2023;A;Data management and data science;SIAM International Conference on Data Mining (SDM);siam international conference data mining;MATCH;36;66;0.956522
+SIGIR;ACM International Conference on Research and Development in Information Retrieval;CORE2023;A*;Data management and data science;ACM SIGIR Conference on Research and Development in Information Retrieval;SIGIR;ACRONYM MATCH;123;175;0.909091
+SIGMOD;ACM Special Interest Group on Management of Data Conference;CORE2023;A*;Data management and data science;ACM SIGMOD International Conference on Management of Data;SIGMOD;ACRONYM MATCH;74;110;0.620690
+SIGdial;Annual Meeting of the Special Interest Group on Discourse and Dialog;CORE2023;B;Artificial intelligence;Annual Meeting of the Special Interest Group on Discourse and Dialogue (SIGDIAL);annual meeting special interest group discourse dialog;MATCH;26;57;0.931507
+SISAP;International Conference on Similarity Search and Applications;CORE2023;B;Data management and data science;Similarity Search and Applications;similarity search applications;FALLBACK 2 WORDS REMOVED MATCH;12;19;0.708333
+SSDBM;International Conference on Scientific and Statistical Data Base Management;CORE2023;B;Data management and data science;Statistical and Scientific Database Management (SSDBM);SSDBM;ACRONYM MATCH;13;17;0.614173
+SSPR;Structural and Syntactical Pattern Recognition;CORE2023;B;Computer vision and multimedia computation;NA;NA;NO MATCH;NA;NA;NA
+SoCS;The Symposium of Combinatorial Search;CORE2023;B;Artificial intelligence;Symposium on Combinatorial Search;symposium combinatorial search;MATCH;20;39;0.914286
+TPDL;International Conference on Theory and Practice of Digital Libraries;CORE2023;B;Data management and data science;International Conference on Theory and Practice of Digital Libraries;international conference theory practice digital libraries;MATCH;13;20;1.000000
+UAI;Conference in Uncertainty in Artificial Intelligence;CORE2023;A;Artificial intelligence;Conference on Uncertainty in Artificial Intelligence (UAI);conference uncertainty artificial intelligence;MATCH;50;85;0.944444
+VLDB;International Conference on Very Large Databases;CORE2023;A*;Data management and data science;International Conference on Very Large Databases;international conference very large databases;MATCH;90;125;1.000000
+WACV;IEEE Workshop on Applications of Computer Vision;CORE2023;A;Computer vision and multimedia computation;IEEE/CVF Winter Conference on Applications of Computer Vision (WACV);ieee workshop applications computer vision;MATCH;131;211;0.754386
+WI;IEEE/WIC/ACM International Conference on Web Intelligence;CORE2023;B;Artificial intelligence;NA;NA;NO MATCH;NA;NA;NA
+WISE;International Conference on Web Information Systems Engineering;CORE2023;B;Data management and data science;Web Information Systems Engineering (WISE);WISE;ACRONYM MATCH;17;21;0.679612
+WSDM;ACM International Conference on Web Search and Data Mining;CORE2023;A;Data management and data science;ACM International Conference on Web Search and Data Mining;acm international conference web search data mining;MATCH;86;135;1.000000

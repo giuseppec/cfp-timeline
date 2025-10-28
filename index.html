@@ -11,7 +11,9 @@
 <body>
 	<h1>ML Conference Deadlines and Timeline</h1>
 	<p id="head">
-	  This is a fork of <a href="https://lucjaulmes.github.io/cfp-timeline/">the original CFP timeline site</a> (<a href="https://github.com/lucjaulmes/cfp-timeline">source on GitHub</a>), with a narrower, ML/AI-focused conference set, higher-tier filtering, a broader, changeable timeline window, and updated styling.
+	  This is a fork of <a href="https://lucjaulmes.github.io/cfp-timeline/">the original CFP timeline site</a>
+	  (<a href="https://github.com/lucjaulmes/cfp-timeline">source on GitHub</a>), with a narrower, ML/AI-focused conference set, higher-tier filtering,, a broader, changeable timeline window, and updated styling.
+	  It also includes a filter based on <a href="https://scholar.google.com/intl/de/scholar/metrics.html">Google Scholar's H5 metrics</a>.
 	  It aggregates conferences from the
 	  <a href="http://portal.core.edu.au/conf-ranks/">CORE rankings</a> and the
 	  <a href="https://scie.lcc.uma.es/gii-grin-scie-rating/conferenceRating.jsf">GII-GRIN-SCIE (GGS) ratings</a>,
@@ -22,7 +24,7 @@
 	<p>
 	  If you see missing or incorrect data, please update or create the corresponding WikiCFP entry.
 	  You can also report wrong CFP matches or other issues on
-	  <a id="github" href="https://github.com/giuseppec/cfp-timeline/issues/">GitHub</a>.
+	  <a href="https://github.com/giuseppec/cfp-timeline/issues/">GitHub</a>.
 	</p>
 
 	<div class="error_log_container">
@@ -80,7 +82,34 @@
 			<button id="range_apply" type="button">Apply</button>
 			<button id="range_reset" type="button">Reset to Default</button>
 		</fieldset>
-		<fieldset id="filters"><legend>Filters</legend></fieldset>
+		<fieldset id="filters"><legend>Filters</legend>
+			<div id="h5_filters" class="h5filters">
+				<div class="h5ctrl">
+					<div class="h5label-top">H5Index2024</div>
+					<div class="h5range-info" id="h5index_range_info"></div>
+					<div class="dual-slider vertical" id="h5index_slider">
+						<input type="range" id="h5index_min" min="0" max="0" value="0" orient="vertical" />
+						<input type="range" id="h5index_max" min="0" max="0" value="0" orient="vertical" />
+						<div class="handle-value handle-min" id="h5index_min_value"></div>
+						<div class="handle-value handle-max" id="h5index_max_value"></div>
+					</div>
+					<label class="h5show"><input type="checkbox" id="h5_show_missing" />show missings</label>
+				</div>
+					<div class="h5ctrl">
+					<div class="h5label-top">H5Median2024</div>
+					<div class="h5range-info" id="h5median_range_info"></div>
+					<div class="dual-slider vertical" id="h5median_slider">
+						<input type="range" id="h5median_min" min="0" max="0" value="0" orient="vertical" />
+						<input type="range" id="h5median_max" min="0" max="0" value="0" orient="vertical" />
+						<div class="handle-value handle-min" id="h5median_min_value"></div>
+						<div class="handle-value handle-max" id="h5median_max_value"></div>
+					</div>
+					<label class="h5show"><input type="checkbox" id="h5_show_missing" />show missings</label>
+				</div>
+				</div>
+			</div>
+			
+		</fieldset>
 	</form>
 
 	<script type="text/javascript" src="cfp-timeline.js"></script>

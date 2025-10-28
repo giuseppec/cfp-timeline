@@ -26,6 +26,9 @@ const suggestions = document.querySelector('#suggestions');
 const form = document.querySelector('form');
 const filters = {};
 let data = [];
+// H5 metrics mapping within Rank arrays
+let h5IndexPos = -1;
+let h5MedianPos = -1;
 
 // the value we push into the hash
 let sethash = '';
@@ -430,10 +433,30 @@ async function filterUpdated(search)
 
 	// Every filter needs to match at least one of its values
 	data.map((row, idx) =>
-		Object.entries(filters).reduce((ret, [col, regex]) => Object.assign(ret,
-			{[col]: Array.isArray(row[col]) ? row[col].some(entry => regex.test(entry)) : regex.test(row[col])}
-		), {index: idx}
-	)).forEach(({ index, ...row_filters }) =>
+		{
+			const acc = { index: idx };
+			for (const [key, rule] of Object.entries(filters)) {
+				if (typeof rule === 'object' && rule && rule.type === 'range') {
+					const pos = rule.pos;
+					let ok = true;
+					if (pos >= 0) {
+						const val = row[rankIdx][pos];
+						if (val == null) {
+							ok = !rule.ignoreMissing;
+						} else {
+							const num = Number(val);
+							ok = (num >= rule.min && num <= rule.max);
+						}
+					}
+					acc[key] = ok;
+				} else {
+					const regex = rule;
+					acc[key] = Array.isArray(row[key]) ? row[key].some(entry => regex.test(entry)) : regex.test(row[key]);
+				}
+			}
+			return acc;
+		}
+	).forEach(({ index, ...row_filters }) =>
 	{
 		const show = Object.values(row_filters).every(val => val);
 		const tl_display = show ? 'block' : 'none';
@@ -447,7 +470,15 @@ function makeFilter(colIdx, name, sortfunction)
 {
 	let values = data.map(row => row[colIdx]);
 	if (name === 'rank')
-		values = [].concat(...values).map(rank => rank || '(unranked)');
+	{
+		// Exclude H5 numeric entries from the Rank filter; keep only CORE/GGS/etc.
+		values = data.map(row =>
+			(row[rankIdx] || []).filter((val, idx) =>
+				(row[rankingIdx] || [])[idx] !== 'H5Index2024' && (row[rankingIdx] || [])[idx] !== 'H5Median2024'
+			).map(v => v || '(unranked)')
+		);
+		values = [].concat(...values);
+	}
 	values = values.sort(sortfunction).filter((val, idx, arr) => idx === 0 || val !== arr[idx - 1]);
 
 	const p = document.createElement('p');
@@ -602,6 +633,13 @@ function populatePage(json)
 
 	origOffset = json['cfp_columns'].indexOf('orig_abstract')
 
+	// Determine H5 positions by inspecting Rank system of first row
+	if (data.length > 0) {
+		const systems = data[0][rankingIdx] || [];
+		h5IndexPos = systems.indexOf('H5Index2024');
+		h5MedianPos = systems.indexOf('H5Median2024');
+	}
+
 	// Use lexicographic sort for dates, in format YYYYMMDD. NB: some dates are null.
 	const mindate = [
 		date_zero.getFullYear(),
@@ -660,6 +698,7 @@ function populatePage(json)
 
 	// Initialize range controls
 	setupRangeControls();
+	setupH5Controls();
 }
 
 function parsingErrors(content)
@@ -772,4 +811,98 @@ function setupRangeControls()
 			filterUpdated();
         }
     };
+}
+
+function getH5Bounds()
+{
+    const valsIndex = [];
+    const valsMedian = [];
+    data.forEach(row => {
+        if (h5IndexPos >= 0) {
+            const v = row[rankIdx][h5IndexPos];
+            if (v != null) valsIndex.push(Number(v));
+        }
+        if (h5MedianPos >= 0) {
+            const v = row[rankIdx][h5MedianPos];
+            if (v != null) valsMedian.push(Number(v));
+        }
+    });
+    const minI = valsIndex.length ? Math.min(...valsIndex) : 0;
+    const maxI = valsIndex.length ? Math.max(...valsIndex) : 0;
+    const minM = valsMedian.length ? Math.min(...valsMedian) : 0;
+    const maxM = valsMedian.length ? Math.max(...valsMedian) : 0;
+    return { minI, maxI, minM, maxM };
+}
+
+function setupH5Controls()
+{
+    const indexMin = document.getElementById('h5index_min');
+    const indexMax = document.getElementById('h5index_max');
+    const indexMinVal = document.getElementById('h5index_min_value');
+    const indexMaxVal = document.getElementById('h5index_max_value');
+    const indexRangeInfo = document.getElementById('h5index_range_info');
+    const indexSlider = document.getElementById('h5index_slider');
+
+    const medianMin = document.getElementById('h5median_min');
+    const medianMax = document.getElementById('h5median_max');
+    const medianMinVal = document.getElementById('h5median_min_value');
+    const medianMaxVal = document.getElementById('h5median_max_value');
+    const medianRangeInfo = document.getElementById('h5median_range_info');
+    const medianSlider = document.getElementById('h5median_slider');
+
+    // Single checkbox for both H5 metrics
+    const h5ShowMissing = document.getElementById('h5_show_missing');
+
+    if (!indexMin || !indexMax || !medianMin || !medianMax) return;
+
+    const { minI, maxI, minM, maxM } = getH5Bounds();
+
+    [indexMin, indexMax].forEach(inp => { inp.min = String(minI); inp.max = String(maxI); });
+    indexMin.value = String(minI);
+    indexMax.value = String(maxI);
+
+    [medianMin, medianMax].forEach(inp => { inp.min = String(minM); inp.max = String(maxM); });
+    medianMin.value = String(minM);
+    medianMax.value = String(maxM);
+
+    // Set range info
+    indexRangeInfo.textContent = `${minI} - ${maxI}`;
+    medianRangeInfo.textContent = `${minM} - ${maxM}`;
+
+    function clamp(val, lo, hi) { return Math.max(lo, Math.min(hi, val)); }
+
+    function applyH5Filter() {
+        let mi = clamp(Number(indexMin.value), minI, maxI);
+        let xi = clamp(Number(indexMax.value), minI, maxI);
+        if (xi < mi) [mi, xi] = [xi, mi];
+        indexMin.value = String(mi);
+        indexMax.value = String(xi);
+        indexMinVal.textContent = String(mi);
+        indexMaxVal.textContent = String(xi);
+
+        let mm = clamp(Number(medianMin.value), minM, maxM);
+        let xm = clamp(Number(medianMax.value), minM, maxM);
+        if (xm < mm) [mm, xm] = [xm, mm];
+        medianMin.value = String(mm);
+        medianMax.value = String(xm);
+        medianMinVal.textContent = String(mm);
+        medianMaxVal.textContent = String(xm);
+
+        // Update filters: checkbox checked means show missing, so ignoreMissing should be false
+        // Single checkbox controls both metrics
+        const showMissing = h5ShowMissing && h5ShowMissing.checked;
+        filters['h5index'] = { type: 'range', pos: h5IndexPos, min: mi, max: xi, ignoreMissing: !showMissing };
+        filters['h5median'] = { type: 'range', pos: h5MedianPos, min: mm, max: xm, ignoreMissing: !showMissing };
+
+        filterUpdated();
+    }
+
+    [indexMin, indexMax, medianMin, medianMax].forEach(inp => {
+        inp.oninput = applyH5Filter;
+        inp.onchange = applyH5Filter;
+    });
+    h5ShowMissing && (h5ShowMissing.onchange = applyH5Filter);
+
+    // Initial render
+    applyH5Filter();
 }

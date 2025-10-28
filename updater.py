@@ -1807,7 +1807,12 @@ class CoreRanking(Ranking):
 
 	@classmethod
 	def _load_confs(cls) -> pd.DataFrame:
-		return super()._load_confs().fillna({'field': '(missing)'})
+		# Allow extra columns in core.csv; keep only required ones
+		confs = pd.read_csv(cls._file, sep=';')
+		missing = set(cls._col_order) - set(confs.columns)
+		if missing:
+			raise FileNotFoundError(f'Missing expected columns in {cls._file}: {missing}')
+		return confs[cls._col_order].fillna({'field': '(missing)'})
 
 
 	@classmethod
@@ -1920,6 +1925,12 @@ def json_encode_dates(obj: datetime.date):
 @click.pass_context
 def update(ctx: click.Context, cache: bool, delay: float, report_spelling: bool):
 	""" Update the Core-CFP data. If no command is provided, update_confs is run.  """
+	# Ensure cache directory exists when caching is enabled
+	try:
+		if cache:
+			os.makedirs('cache', exist_ok=True)
+	except Exception:
+		pass
 	RequestWrapper.set_delay(delay)
 	RequestWrapper.set_use_cache(cache)
 
@@ -2050,6 +2061,38 @@ def cfps(out_file: str, debug: bool = False):
 
 	# Combine all conference / cfp data and sort based on acronym
 	out_years = [year for year in search_years if year >= today.year]
+
+	# Augment Rank and Rank system with H5 metrics from core.csv
+	try:
+		core_df = pd.read_csv('core.csv', sep=';')
+		core_df['ACRONYM_UP'] = core_df['acronym'].str.upper()
+		core_h5 = core_df.set_index('ACRONYM_UP')[['h5_index', 'h5_median']]
+	except Exception:
+		core_h5 = pd.DataFrame(columns=['h5_index', 'h5_median'])
+
+	def _append_h5(row: list) -> list:
+		try:
+			acr_up = str(row[0]).upper()
+			h5 = core_h5.loc[acr_up] if acr_up in core_h5.index else pd.Series({'h5_index': np.nan, 'h5_median': np.nan})
+		except Exception:
+			h5 = pd.Series({'h5_index': np.nan, 'h5_median': np.nan})
+
+		# row structure: [Acronym, Title, Rank(tuple), Rank system(tuple), Field]
+		rank_list = list(row[2])
+		ranksys_list = list(row[3])
+		# Append systems first to keep alignment obvious in downstream consumers
+		ranksys_list.extend(['H5Index2024', 'H5Median2024'])
+		# Convert NA to None (-> null in JSON)
+		def _val(x):
+			return None if pd.isna(x) else int(x)
+		rank_list.extend([_val(h5.get('h5_index')), _val(h5.get('h5_median'))])
+
+		row[2] = tuple(rank_list)
+		row[3] = tuple(ranksys_list)
+		return row
+
+	conf_data = conf_data.map(_append_h5)
+
 	all_data = conf_data.add(cfp_data[out_years].sum(axis='columns')).reindex_like(conf_data.str[0].sort_values())
 
 	try:
