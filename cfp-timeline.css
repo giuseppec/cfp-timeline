@@ -150,6 +150,13 @@ a:hover {
 /* H5 vertical dual-handle range sliders */
 #h5_filters {
 	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: .5em;
+}
+
+.h5ctrl-row {
+	display: flex;
 	gap: 1.5em;
 	align-items: flex-start;
 }
@@ -208,10 +215,17 @@ a:hover {
 	font-weight: 500;
 	color: #0d6efd;
 	white-space: nowrap;
-	pointer-events: none;
 	background: white;
 	padding: 2px 4px;
 	border-radius: 3px;
+}
+
+/* When the handle-value is an input, allow interaction */
+input.handle-value {
+    pointer-events: auto;
+    border: 1px solid #ced4da;
+    color: #0d6efd;
+    width: 3.5em;
 }
 
 .dual-slider.vertical .handle-min {
@@ -227,9 +241,10 @@ a:hover {
 }
 
 .h5show {
-	margin-top: .5em;
+	margin-top: .25em;
 	font-size: .85em;
 	color: #495057;
+	text-align: center;
 }
 
 /* Make the filter group heights consistent by matching tallest block */
@@ -247,6 +262,16 @@ a:hover {
 	display: flex;
 	gap: .75em;
 	align-items: center;
+}
+
+/* Match styling of Range/Filters for the About block */
+#about_filters {
+    margin: 1em auto 0;
+    padding: 1em 1.5em;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 #range_controls input[type="date"] {

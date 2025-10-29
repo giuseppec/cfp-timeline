@@ -133,7 +133,7 @@ function parseFragment()
 
 function updateFragment()
 {
-	const params = Array.from(form.querySelectorAll('select')).reduce((params, sel) =>
+    const params = Array.from(form.querySelectorAll('select')).reduce((params, sel) =>
 		params.concat(Array.from(sel.selectedOptions).map(opt => `${sel.name}=${encodeURIComponent(opt.value)}`))
 	, []).sort().filter((it, pos, arr) => pos === 0 || it !== arr[pos - 1]);
 
@@ -143,8 +143,16 @@ function updateFragment()
 		return item.indexOf('=') < 0 ? item : prev;
 	}, null);
 
-	if (anchor)
+    if (anchor)
 		params.push(anchor);
+
+    // Append H5 slider minimums if present
+    const idxMinEl = document.getElementById('h5index_min');
+    const medMinEl = document.getElementById('h5median_min');
+    if (idxMinEl)
+        params.push(`h5index=${encodeURIComponent(idxMinEl.value)}`);
+    if (medMinEl)
+        params.push(`h5median=${encodeURIComponent(medMinEl.value)}`);
 
 	sethash = '#' + params.join('&');
 	if (window.location.hash !== sethash)
@@ -436,19 +444,26 @@ async function filterUpdated(search)
 		{
 			const acc = { index: idx };
 			for (const [key, rule] of Object.entries(filters)) {
-				if (typeof rule === 'object' && rule && rule.type === 'range') {
-					const pos = rule.pos;
-					let ok = true;
-					if (pos >= 0) {
-						const val = row[rankIdx][pos];
-						if (val == null) {
-							ok = !rule.ignoreMissing;
-						} else {
-							const num = Number(val);
-							ok = (num >= rule.min && num <= rule.max);
-						}
-					}
-					acc[key] = ok;
+                if (typeof rule === 'object' && rule && rule.type === 'range') {
+                    let ok = true;
+                    let val = null;
+                    if (typeof rule.pos === 'number' && rule.pos >= 0) {
+                        // legacy: fixed position
+                        val = (row[rankIdx] || [])[rule.pos];
+                    } else if (rule.system) {
+                        // preferred: locate by system name per row
+                        const systems = row[rankingIdx] || [];
+                        const ranksVals = row[rankIdx] || [];
+                        const sIdx = systems.indexOf(rule.system);
+                        val = sIdx >= 0 ? ranksVals[sIdx] : null;
+                    }
+                    if (val == null) {
+                        ok = !rule.ignoreMissing;
+                    } else {
+                        const num = Number(val);
+                        ok = (num >= rule.min && num <= rule.max);
+                    }
+                    acc[key] = ok;
 				} else {
 					const regex = rule;
 					acc[key] = Array.isArray(row[key]) ? row[key].some(entry => regex.test(entry)) : regex.test(row[key]);
@@ -818,12 +833,16 @@ function getH5Bounds()
     const valsIndex = [];
     const valsMedian = [];
     data.forEach(row => {
-        if (h5IndexPos >= 0) {
-            const v = row[rankIdx][h5IndexPos];
+        const systems = row[rankingIdx] || [];
+        const ranksVals = row[rankIdx] || [];
+        const idxI = systems.indexOf('H5Index2024');
+        const idxM = systems.indexOf('H5Median2024');
+        if (idxI >= 0) {
+            const v = ranksVals[idxI];
             if (v != null) valsIndex.push(Number(v));
         }
-        if (h5MedianPos >= 0) {
-            const v = row[rankIdx][h5MedianPos];
+        if (idxM >= 0) {
+            const v = ranksVals[idxM];
             if (v != null) valsMedian.push(Number(v));
         }
     });
@@ -837,33 +856,27 @@ function getH5Bounds()
 function setupH5Controls()
 {
     const indexMin = document.getElementById('h5index_min');
-    const indexMax = document.getElementById('h5index_max');
-    const indexMinVal = document.getElementById('h5index_min_value');
-    const indexMaxVal = document.getElementById('h5index_max_value');
+    let indexMinVal = document.getElementById('h5index_min_value');
     const indexRangeInfo = document.getElementById('h5index_range_info');
     const indexSlider = document.getElementById('h5index_slider');
 
     const medianMin = document.getElementById('h5median_min');
-    const medianMax = document.getElementById('h5median_max');
-    const medianMinVal = document.getElementById('h5median_min_value');
-    const medianMaxVal = document.getElementById('h5median_max_value');
+    let medianMinVal = document.getElementById('h5median_min_value');
     const medianRangeInfo = document.getElementById('h5median_range_info');
     const medianSlider = document.getElementById('h5median_slider');
 
     // Single checkbox for both H5 metrics
     const h5ShowMissing = document.getElementById('h5_show_missing');
 
-    if (!indexMin || !indexMax || !medianMin || !medianMax) return;
+    if (!indexMin || !medianMin) return;
 
     const { minI, maxI, minM, maxM } = getH5Bounds();
 
-    [indexMin, indexMax].forEach(inp => { inp.min = String(minI); inp.max = String(maxI); });
+    [indexMin].forEach(inp => { inp.min = String(minI); inp.max = String(maxI); });
     indexMin.value = String(minI);
-    indexMax.value = String(maxI);
 
-    [medianMin, medianMax].forEach(inp => { inp.min = String(minM); inp.max = String(maxM); });
+    [medianMin].forEach(inp => { inp.min = String(minM); inp.max = String(maxM); });
     medianMin.value = String(minM);
-    medianMax.value = String(maxM);
 
     // Set range info
     indexRangeInfo.textContent = `${minI} - ${maxI}`;
@@ -871,38 +884,79 @@ function setupH5Controls()
 
     function clamp(val, lo, hi) { return Math.max(lo, Math.min(hi, val)); }
 
-    function applyH5Filter() {
-        let mi = clamp(Number(indexMin.value), minI, maxI);
-        let xi = clamp(Number(indexMax.value), minI, maxI);
-        if (xi < mi) [mi, xi] = [xi, mi];
-        indexMin.value = String(mi);
-        indexMax.value = String(xi);
-        indexMinVal.textContent = String(mi);
-        indexMaxVal.textContent = String(xi);
-
-        let mm = clamp(Number(medianMin.value), minM, maxM);
-        let xm = clamp(Number(medianMax.value), minM, maxM);
-        if (xm < mm) [mm, xm] = [xm, mm];
-        medianMin.value = String(mm);
-        medianMax.value = String(xm);
-        medianMinVal.textContent = String(mm);
-        medianMaxVal.textContent = String(xm);
-
-        // Update filters: checkbox checked means show missing, so ignoreMissing should be false
-        // Single checkbox controls both metrics
-        const showMissing = h5ShowMissing && h5ShowMissing.checked;
-        filters['h5index'] = { type: 'range', pos: h5IndexPos, min: mi, max: xi, ignoreMissing: !showMissing };
-        filters['h5median'] = { type: 'range', pos: h5MedianPos, min: mm, max: xm, ignoreMissing: !showMissing };
-
-        filterUpdated();
+    // Turn display bubbles into editable number inputs, committing on Enter
+    function makeEditableHandle(handleEl, min, max, onCommit) {
+        if (!handleEl || handleEl.tagName === 'INPUT') return handleEl;
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = handleEl.className; // preserve .handle-value and position class
+        input.id = handleEl.id;
+        input.min = String(min);
+        input.max = String(max);
+        input.step = '1';
+        input.inputMode = 'numeric';
+        input.autocomplete = 'off';
+        input.spellcheck = false;
+        input.value = handleEl.textContent || '';
+        handleEl.replaceWith(input);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const num = Number(input.value);
+                if (!Number.isNaN(num)) onCommit(clamp(num, Number(input.min), Number(input.max)));
+            }
+        });
+        return input;
     }
 
-    [indexMin, indexMax, medianMin, medianMax].forEach(inp => {
+    function applyH5FragmentDefaults() {
+        const selectedValues = parseFragment();
+        if (selectedValues['h5index'] && selectedValues['h5index'][0] != null) {
+            const v = Number(selectedValues['h5index'][0]);
+            if (!Number.isNaN(v)) indexMin.value = String(v);
+        }
+        if (selectedValues['h5median'] && selectedValues['h5median'][0] != null) {
+            const v = Number(selectedValues['h5median'][0]);
+            if (!Number.isNaN(v)) medianMin.value = String(v);
+        }
+    }
+
+    function applyH5Filter() {
+        let mi = clamp(Number(indexMin.value), minI, maxI);
+        const xi = maxI; // fixed to dataset maximum
+        indexMin.value = String(mi);
+        if (indexMinVal.tagName === 'INPUT') indexMinVal.value = String(mi); else indexMinVal.textContent = String(mi);
+
+        let mm = clamp(Number(medianMin.value), minM, maxM);
+        const xm = maxM; // fixed to dataset maximum
+        medianMin.value = String(mm);
+        if (medianMinVal.tagName === 'INPUT') medianMinVal.value = String(mm); else medianMinVal.textContent = String(mm);
+
+        // Update filters: checkbox checked means show missing, so ignoreMissing should be false
+        // Single checkbox controls both metrics; look up by system name per row
+        const showMissing = h5ShowMissing && h5ShowMissing.checked;
+        filters['h5index'] = { type: 'range', system: 'H5Index2024', min: mi, max: xi, ignoreMissing: !showMissing };
+        filters['h5median'] = { type: 'range', system: 'H5Median2024', min: mm, max: xm, ignoreMissing: !showMissing };
+
+        filterUpdated();
+        updateFragment();
+    }
+
+    [indexMin, medianMin].forEach(inp => {
         inp.oninput = applyH5Filter;
         inp.onchange = applyH5Filter;
     });
     h5ShowMissing && (h5ShowMissing.onchange = applyH5Filter);
 
     // Initial render
+    applyH5FragmentDefaults();
+    // Replace bubbles with editable inputs and wire commit handlers
+    indexMinVal = makeEditableHandle(indexMinVal, minI, maxI, (val) => { indexMin.value = String(val); applyH5Filter(); });
+    medianMinVal = makeEditableHandle(medianMinVal, minM, maxM, (val) => { medianMin.value = String(val); applyH5Filter(); });
     applyH5Filter();
+
+    // Sync on hash changes (in addition to select filters)
+    window.addEventListener('hashchange', () => {
+        applyH5FragmentDefaults();
+        applyH5Filter();
+    });
 }

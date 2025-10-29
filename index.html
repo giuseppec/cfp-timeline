@@ -12,14 +12,12 @@
 	<h1>ML Conference Deadlines and Timeline</h1>
 	<p id="head">
 	  This is a fork of <a href="https://lucjaulmes.github.io/cfp-timeline/">the original CFP timeline site</a>
-	  (<a href="https://github.com/lucjaulmes/cfp-timeline">source on GitHub</a>), with a narrower, ML/AI-focused conference set, higher-tier filtering,, a broader, changeable timeline window, and updated styling.
-	  It also includes a filter based on <a href="https://scholar.google.com/intl/de/scholar/metrics.html">Google Scholar's H5 metrics</a>.
+	  (<a href="https://github.com/lucjaulmes/cfp-timeline">source on GitHub</a>), with a narrower, ML/AI-focused conference set, improved filtering options, an adjustable timeline window, and updated styling.
 	  It aggregates conferences from the
 	  <a href="http://portal.core.edu.au/conf-ranks/">CORE rankings</a> and the
-	  <a href="https://scie.lcc.uma.es/gii-grin-scie-rating/conferenceRating.jsf">GII-GRIN-SCIE (GGS) ratings</a>,
-	  cross-references them with their calls for papers on
+	  <a href="https://scie.lcc.uma.es/gii-grin-scie-rating/conferenceRating.jsf">GII-GRIN-SCIE (GGS) ratings</a>, adds <a href="https://scholar.google.com/intl/de/scholar/metrics.html">Google Scholar's H5 metrics</a>, cross-references them with their calls for papers on
 	  <a href="http://www.wikicfp.com/cfp/">WikiCFP</a> for key dates, and places them on a timeline.
-	  Missing dates may be inferred from previous editions.
+	  Missing dates may be inferred from previous conference editions.
 	</p>
 	<p>
 	  If you see missing or incorrect data, please update or create the corresponding WikiCFP entry.
@@ -83,32 +81,49 @@
 			<button id="range_reset" type="button">Reset to Default</button>
 		</fieldset>
 		<fieldset id="filters"><legend>Filters</legend>
-			<div id="h5_filters" class="h5filters">
-				<div class="h5ctrl">
+				<div id="h5_filters" class="h5filters">
+					<div class="h5ctrl-row">
+						<div class="h5ctrl">
 					<div class="h5label-top">H5Index2024</div>
 					<div class="h5range-info" id="h5index_range_info"></div>
 					<div class="dual-slider vertical" id="h5index_slider">
 						<input type="range" id="h5index_min" min="0" max="0" value="0" orient="vertical" />
-						<input type="range" id="h5index_max" min="0" max="0" value="0" orient="vertical" />
 						<div class="handle-value handle-min" id="h5index_min_value"></div>
-						<div class="handle-value handle-max" id="h5index_max_value"></div>
 					</div>
-					<label class="h5show"><input type="checkbox" id="h5_show_missing" />show missings</label>
-				</div>
-					<div class="h5ctrl">
+						</div>
+						<div class="h5ctrl">
 					<div class="h5label-top">H5Median2024</div>
 					<div class="h5range-info" id="h5median_range_info"></div>
 					<div class="dual-slider vertical" id="h5median_slider">
 						<input type="range" id="h5median_min" min="0" max="0" value="0" orient="vertical" />
-						<input type="range" id="h5median_max" min="0" max="0" value="0" orient="vertical" />
 						<div class="handle-value handle-min" id="h5median_min_value"></div>
-						<div class="handle-value handle-max" id="h5median_max_value"></div>
 					</div>
-					<label class="h5show"><input type="checkbox" id="h5_show_missing" />show missings</label>
-				</div>
+						</div>
+					</div>
+					<label class="h5show"><input type="checkbox" id="h5_show_missing" checked />show missings</label>
 				</div>
 			</div>
 			
+		</fieldset>
+		<fieldset id="about_filters"><legend>About the filters</legend>
+			<h3>H5Index2024 / H5Median2024</h3>
+			<p>
+				These sliders let you filter conferences by recent citation impact. H5-index and H5-median are citation metrics reported by Google Scholar for venues. Higher values mean that more of the venue’s recent papers are cited often. The values were scraped from the public Google Scholar interface, so some conferences may have missing or incorrect values.<br />
+				Source: <a href="https://scholar.google.com/intl/de/scholar/metrics.html#metrics">https://scholar.google.com/intl/de/scholar/metrics.html#metrics</a>
+			</p>
+			<h3>Conference</h3>
+			<p>Filter by specific conference names.</p>
+			<h3>CORE/GGS Rankings</h3>
+			<p>
+				Filter by conference quality tiers (A++, A+, A, …). These tiers come from international ranking initiatives such as CORE and GGS, which assess venue prestige and selectivity.<br />
+				Sources: CORE <a href="https://portal.core.edu.au/conf-ranks/">https://portal.core.edu.au/conf-ranks/</a><br />
+				GGS <a href="https://scie.lcc.uma.es/gii-grin-scie-rating/conferenceRating.jsf">https://scie.lcc.uma.es/gii-grin-scie-rating/conferenceRating.jsf</a>
+			</p>
+			<h3>Field</h3>
+			<p>
+				Filter by the conference’s main research area (its primary field of research in the CORE ranking).<br />
+				Source: <a href="https://drive.google.com/file/d/1bxFw3pTd-G5bMqcHr9XPoVtuZJa68zua">https://drive.google.com/file/d/1bxFw3pTd-G5bMqcHr9XPoVtuZJa68zua</a>
+			</p>
 		</fieldset>
 	</form>
 
