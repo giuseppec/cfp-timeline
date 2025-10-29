@@ -274,6 +274,36 @@ input.handle-value {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+/* Legend box fieldset styling */
+#legend_box {
+    margin: 1em auto 0;
+    padding: 1em 1.5em;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+#legend_box #legend {
+    margin: 0;
+    padding: 0;
+}
+
+.extrapolated_explanation {
+    margin-top: 0.75em;
+    padding-top: 0.75em;
+    border-top: 1px solid #dee2e6;
+    color: #6c757d;
+}
+
+.extrapolated_explanation .extrapolated {
+    display: inline-block;
+    width: 1.1em;
+    height: 0.8em;
+    vertical-align: middle;
+    margin: 0 0.25em;
+}
+
 #range_controls input[type="date"] {
 	border: 1px solid #ced4da;
 	border-radius: 6px;
@@ -693,7 +723,7 @@ span.acronyms a:hover {
 }
 
 .extrapolated {
-	background: #eee;
+	background: #fff;
 	color: #333;
 }
 

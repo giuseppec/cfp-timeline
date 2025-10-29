@@ -733,6 +733,9 @@ function populatePage(json)
 	// Initialize range controls
 	setupRangeControls();
 	setupH5Controls();
+	
+	// Setup interactive legend
+	setupInteractiveLegend();
 }
 
 function parsingErrors(content)
@@ -1002,5 +1005,80 @@ function setupH5Controls()
     window.addEventListener('hashchange', () => {
         applyH5FragmentDefaults();
         applyH5Filter();
+    });
+}
+
+function setupInteractiveLegend()
+{
+    const legend = document.getElementById('legend');
+    if (!legend) return;
+
+    // Setup click handlers for each legend item
+    const legendItems = legend.querySelectorAll('dt');
+    legendItems.forEach((dt, idx) => {
+        const span = dt.querySelector('span');
+        if (!span) return;
+
+        // Find which type this legend item represents
+        // Check classes in order of specificity
+        let selector = null;
+
+        // Skip extrapolated - it's not interactive
+        if (span.classList.contains('extrapolated')) {
+            return;
+        }
+
+        if (span.classList.contains('conf')) {
+            selector = '#timeline span.conf';
+        } else if (span.classList.contains('review')) {
+            selector = '#timeline span.review';
+        } else if (span.classList.contains('abstract')) {
+            selector = '#timeline span.abstract';
+        } else if (span.classList.contains('submit')) {
+            selector = '#timeline span[class*="date.sub"], #timeline span[class*="submit"]';
+        } else if (span.classList.contains('camera')) {
+            selector = '#timeline span[class*="date.cam"], #timeline span[class*="camera"]';
+        } else if (span.classList.contains('today')) {
+            selector = '#timeline_header .today, #now .today';
+        }
+
+        if (!selector) return;
+
+        // Add cursor pointer style
+        dt.style.cursor = 'pointer';
+        dt.setAttribute('title', 'Click to toggle visibility');
+        const dd = dt.nextElementSibling;
+        if (dd) {
+            dd.style.cursor = 'pointer';
+        }
+
+        // Store visibility state (default: visible)
+        let isVisible = true;
+
+        // Toggle function
+        const toggleVisibility = () => {
+            isVisible = !isVisible;
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                el.style.display = isVisible ? '' : 'none';
+            });
+
+            // Visual feedback on legend item
+            if (isVisible) {
+                dt.style.opacity = '1';
+                span.style.opacity = '1';
+                if (dd) dd.style.opacity = '1';
+            } else {
+                dt.style.opacity = '0.5';
+                span.style.opacity = '0.5';
+                if (dd) dd.style.opacity = '0.5';
+            }
+        };
+
+        // Attach click handler to dt and dd
+        dt.onclick = toggleVisibility;
+        if (dd) {
+            dd.onclick = toggleVisibility;
+        }
     });
 }

@@ -54,24 +54,25 @@
 		<div id="timeline"></div>
 	</div>
 
-	<dl id="legend">
-		<dt><span class="duration conf">&nbsp;</span></dt>
-		<dd>Conference</dd>
-		<dt><span class="duration review">&nbsp;</span></dt>
-		<dd>Review (submission to notification)<wbr></dd>
-		<dt><span class="duration abstract">&nbsp;</span></dt>
-		<dd>Pre-submission (abstract registration)<wbr></dd>
-		<dt><span class="submit"><sup>◆</sup></span></dt>
-		<dd>Submission date (notification unknown)<wbr></dd>
-		<dt><span class="camera"><sup>∎</sup><!-- QED --></span></dt>
-		<dd>Final version due<wbr></dd>
-		<dt><span class="extrapolated">&nbsp;</span></dt>
-		<dd>Dates unavailable, extrapolated from last years'<wbr></dd>
-		<dt><span class="today">&nbsp;</span></dt>
-		<dd>Today</dd>
-	</dl>
-
 	<form action="javascript:void(0);">
+		<fieldset id="legend_box"><legend>Legend</legend>
+			<dl id="legend">
+				<dt><span class="duration conf">&nbsp;</span></dt>
+				<dd>Conference</dd>
+				<dt><span class="duration review">&nbsp;</span></dt>
+				<dd>Review (submission to notification)<wbr></dd>
+				<dt><span class="duration abstract">&nbsp;</span></dt>
+				<dd>Pre-submission (abstract registration)<wbr></dd>
+				<dt><span class="submit"><sup>◆</sup></span></dt>
+				<dd>Submission date (notification unknown)<wbr></dd>
+				<dt><span class="camera"><sup>∎</sup><!-- QED --></span></dt>
+				<dd>Final version due<wbr></dd>
+				<dt><span class="today">&nbsp;</span></dt>
+				<dd>Today</dd>
+			</dl>
+			<p class="extrapolated_explanation">Click any legend item to toggle the visibility of its corresponding timeline elements. 
+				The † symbol indicates dates that were unavailable and were extrapolated from previous years' data.</p>
+		</fieldset>
 		<fieldset id="range_controls"><legend>Range</legend>
 			<label for="range_start">Start Date</label>
 			<input type="date" id="range_start" />
