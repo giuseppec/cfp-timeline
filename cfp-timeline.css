@@ -582,6 +582,12 @@ span.acronyms a:hover {
 	min-width: 0;
 }
 
+/* Ensure header timeline uses the same visible width as the scrollable body
+   by subtracting the vertical scrollbar width from the header's timeblocks. */
+#timeline_header .timeblocks {
+	width: calc(100% - 13.5em - var(--scrollbar-width));
+}
+
 @media only screen and (max-width: 800px) {
 	.timeblocks {
 		width: calc(100% - 9.5em);
@@ -604,6 +610,7 @@ span.acronyms a:hover {
 #months .timeblocks span {
 	background-color: #f8f9fa;
 	border-left: #dee2e6 1px solid;
+    font-variant-numeric: tabular-nums;
 }
 
 #years .timeblocks span:last-child,
