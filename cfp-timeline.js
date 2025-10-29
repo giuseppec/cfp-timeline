@@ -154,6 +154,14 @@ function updateFragment()
     if (medMinEl)
         params.push(`h5median=${encodeURIComponent(medMinEl.value)}`);
 
+    // Append range start/end if present (YYYY-MM-DD)
+    const startEl = document.getElementById('range_start');
+    const endEl = document.getElementById('range_end');
+    if (startEl && startEl.value)
+        params.push(`start=${encodeURIComponent(startEl.value)}`);
+    if (endEl && endEl.value)
+        params.push(`end=${encodeURIComponent(endEl.value)}`);
+
 	sethash = '#' + params.join('&');
 	if (window.location.hash !== sethash)
 		window.location.hash = sethash;
@@ -770,6 +778,22 @@ function setupRangeControls()
     startInput.value = yyyymmdd(new Date(timeline_zero));
     endInput.value = yyyymmdd(new Date(timeline_max));
 
+    function applyRangeFromFragment() {
+        const selectedValues = parseFragment();
+        let changed = false;
+        if (selectedValues['start'] && selectedValues['start'][0]) {
+            const v = selectedValues['start'][0];
+            startInput.value = v;
+            changed = true;
+        }
+        if (selectedValues['end'] && selectedValues['end'][0]) {
+            const v = selectedValues['end'][0];
+            endInput.value = v;
+            changed = true;
+        }
+        if (changed) applyBtn.onclick();
+    }
+
     applyBtn.onclick = () => {
         // parse input dates; allow partial update
         const startVal = startInput.value;
@@ -808,7 +832,8 @@ function setupRangeControls()
 		// Full re-render of timeline items to ensure precise placement
 		timeline.textContent = '';
 		data.forEach(row => makeTimelineItem(row));
-		filterUpdated();
+        filterUpdated();
+        updateFragment();
     };
 
     resetBtn.onclick = () => {
@@ -823,9 +848,14 @@ function setupRangeControls()
 			makeTimelineLegend();
 			timeline.textContent = '';
 			data.forEach(row => makeTimelineItem(row));
-			filterUpdated();
+            filterUpdated();
+            updateFragment();
         }
     };
+
+    // Initialize from fragment if present and keep in sync
+    applyRangeFromFragment();
+    window.addEventListener('hashchange', applyRangeFromFragment);
 }
 
 function getH5Bounds()
