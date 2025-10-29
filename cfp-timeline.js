@@ -20,6 +20,9 @@ let timeline_scale = 100 / (timeline_max - timeline_zero);
 let timeline_scale_px = 0; // pixels per millisecond for precise alignment
 let default_timeline_zero = null;
 let default_timeline_max = null;
+// Default H5 slider lower bounds (used to suppress defaults in URL)
+let default_h5index_min = null;
+let default_h5median_min = null;
 
 const timeline = document.getElementById('timeline');
 const suggestions = document.querySelector('#suggestions');
@@ -146,20 +149,28 @@ function updateFragment()
     if (anchor)
 		params.push(anchor);
 
-    // Append H5 slider minimums if present
+    // Append H5 slider minimums if present and not at defaults
     const idxMinEl = document.getElementById('h5index_min');
     const medMinEl = document.getElementById('h5median_min');
-    if (idxMinEl)
-        params.push(`h5index=${encodeURIComponent(idxMinEl.value)}`);
-    if (medMinEl)
-        params.push(`h5median=${encodeURIComponent(medMinEl.value)}`);
+    if (idxMinEl) {
+        const val = Number(idxMinEl.value);
+        if (default_h5index_min != null && val !== Number(default_h5index_min))
+            params.push(`h5index=${encodeURIComponent(String(val))}`);
+    }
+    if (medMinEl) {
+        const val = Number(medMinEl.value);
+        if (default_h5median_min != null && val !== Number(default_h5median_min))
+            params.push(`h5median=${encodeURIComponent(String(val))}`);
+    }
 
-    // Append range start/end if present (YYYY-MM-DD)
+    // Append range start/end if present (YYYY-MM-DD) and not at defaults
     const startEl = document.getElementById('range_start');
     const endEl = document.getElementById('range_end');
-    if (startEl && startEl.value)
+    const defaultStartStr = (default_timeline_zero != null) ? yyyymmdd(new Date(default_timeline_zero)) : null;
+    const defaultEndStr = (default_timeline_max != null) ? yyyymmdd(new Date(default_timeline_max)) : null;
+    if (startEl && startEl.value && (defaultStartStr == null || startEl.value !== defaultStartStr))
         params.push(`start=${encodeURIComponent(startEl.value)}`);
-    if (endEl && endEl.value)
+    if (endEl && endEl.value && (defaultEndStr == null || endEl.value !== defaultEndStr))
         params.push(`end=${encodeURIComponent(endEl.value)}`);
 
 	sethash = '#' + params.join('&');
@@ -901,6 +912,9 @@ function setupH5Controls()
     if (!indexMin || !medianMin) return;
 
     const { minI, maxI, minM, maxM } = getH5Bounds();
+    // Record global defaults so URL can omit default values
+    default_h5index_min = minI;
+    default_h5median_min = minM;
 
     [indexMin].forEach(inp => { inp.min = String(minI); inp.max = String(maxI); });
     indexMin.value = String(minI);
