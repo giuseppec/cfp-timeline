@@ -1,0 +1,593 @@
+#!/usr/bin/env Rscript
+#
+# updater.R - Simplified functional (no R6) R port of core logic from updater.py
+# Focus:
+#   - Minimal data structures (plain lists)
+#   - Fetch WikiCFP search results & (lightly) parse CFP pages
+#   - Extrapolate missing dates across years
+#   - Basic conference/date validation
+#   - Export JSON similar in shape to Python version
+#
+# Dependencies (install if missing):
+# install.packages(c("httr","rvest","xml2","stringr","jsonlite","lubridate","dplyr","purrr","tibble"))
+#
+suppressPackageStartupMessages({
+  library(httr)
+  library(rvest)
+  library(xml2)
+  library(stringr)
+  library(jsonlite)
+  library(lubridate)
+  library(dplyr)
+  library(purrr)
+  library(tibble)
+})
+
+# ------------------------------------------------------------------
+# Utility helpers
+# ------------------------------------------------------------------
+
+ensure_dir <- function(path) {
+  if (!dir.exists(path)) dir.create(path, recursive = TRUE, showWarnings = FALSE)
+}
+ensure_dir("cache")
+
+clean_print <- function(...) cat(paste0(..., collapse = ""), "\n")
+
+normalize_word <- function(x) {
+  x <- tolower(x)
+  if (nchar(x) > 3) {
+    if (str_ends(x, "ies")) x <- sub("ies$", "y", x)
+    else if (str_ends(x, "s") && !str_ends(x, "ss")) x <- sub("s$", "", x)
+  }
+  x
+}
+
+split_acronym <- function(s) unlist(str_split(tolower(s), "[-_/ @&,.]+"))
+
+# ------------------------------------------------------------------
+# Caching request wrapper (functional style)
+# ------------------------------------------------------------------
+
+.req_state <- new.env(parent = emptyenv())
+.req_state$delay <- 0
+.req_state$use_cache <- TRUE
+.req_state$last_req_times <- list()
+
+set_request_delay <- function(d) { .req_state$delay <- d }
+set_request_cache <- function(flag) { .req_state$use_cache <- flag }
+
+request_wait <- function(url) {
+  host <- parse_url(url)$hostname
+  now <- as.numeric(Sys.time())
+  last <- .req_state$last_req_times[[host]]
+  if (is.null(last)) last <- 0
+  wait_for <- last + .req_state$delay - now
+  if (!is.na(wait_for) && wait_for > 0) Sys.sleep(wait_for)
+  .req_state$last_req_times[[host]] <- now + max(0, wait_for)
+}
+
+get_soup <- function(url, cache_file, ...) {
+  if (.req_state$use_cache && file.exists(cache_file)) {
+    txt <- readLines(cache_file, warn = FALSE, encoding = "UTF-8")
+    return(read_html(paste(txt, collapse = "\n")))
+  }
+  request_wait(url)
+  resp <- httr::GET(url, ...)
+  stop_for_status(resp)
+  txt <- content(resp, as = "text", encoding = "UTF-8")
+  if (.req_state$use_cache) writeLines(txt, cache_file, useBytes = TRUE)
+  read_html(txt)
+}
+
+# ------------------------------------------------------------------
+# Data constructors (plain lists)
+# ------------------------------------------------------------------
+
+create_conference <- function(acronym, title, rank = NA, ranksys = NA, field = NA) {
+  list(
+    acronym = acronym,
+    title = title,
+    rank = rank,
+    ranksys = ranksys,
+    field = ifelse(is.na(field) || field == "", "(missing)", field),
+    acronym_words = split_acronym(acronym),
+    topic_keywords = unique(str_split(tolower(title), "\\s+")[[1]])
+  )
+}
+
+create_dates <- function() {
+  list(
+    abstract = NULL,
+    submission = NULL,
+    notification = NULL,
+    camera_ready = NULL,
+    conf_start = NULL,
+    conf_end = NULL
+  )
+}
+
+create_cfp <- function(acronym, year, id_, desc = "", url_cfp = NULL, link = "(missing)") {
+  list(
+    acronym = acronym,
+    year = as.integer(year),
+    id = id_,
+    desc = desc,
+    url_cfp = url_cfp,
+    link = link,
+    dates = create_dates(),
+    orig = list(),       # flags: TRUE if original, FALSE if extrapolated / corrected
+    date_errors = NA
+  )
+}
+
+# Cache for CFP objects (like Python _cache)
+.cfp_cache <- new.env(parent = emptyenv())
+.cfp_fill_id <- .Machine$integer.max
+
+build_cfp <- function(acronym, year, id_ = NULL, desc = "", url_cfp = NULL, link = NULL) {
+  if (is.null(id_)) {
+    id_use <- .cfp_fill_id
+  } else {
+    id_use <- id_
+  }
+  key <- as.character(id_use)
+  if (exists(key, envir = .cfp_cache, inherits = FALSE)) {
+    return(get(key, envir = .cfp_cache, inherits = FALSE))
+  }
+  cfp <- create_cfp(acronym, year, id_use, desc, url_cfp, link %||% "(missing)")
+  assign(key, cfp, envir = .cfp_cache)
+  if (is.null(id_)) {
+    .cfp_fill_id <<- .cfp_fill_id - 1
+  }
+  cfp
+}
+
+all_cfps <- function() {
+  mget(ls(.cfp_cache), envir = .cfp_cache)
+}
+
+# ------------------------------------------------------------------
+# Fuzzy / difference scoring (simplified)
+# ------------------------------------------------------------------
+
+acronym_diff <- function(a_words, b_words) {
+  if (identical(a_words, b_words))
+    return(-40 * length(a_words) * length(b_words))
+  # Simplified difference: count mismatches + length diff
+  length(setdiff(a_words, b_words)) + length(setdiff(b_words, a_words))
+}
+
+conference_rating_tuple <- function(cfp, conf) {
+  # Returns 5-element rating similar conceptual shape (dropping number dimension)
+  c(
+    acronym_diff(cfp$acronym_words, conf$acronym_words),
+    length(setdiff(conf$field, conf$field)),  # trivial 0
+    0,  # organisers not tracked in this simplified port
+    length(setdiff(cfp$topic_keywords, conf$topic_keywords)) +
+      length(setdiff(conf$topic_keywords, cfp$topic_keywords)),
+    0   # qualifiers not tracked
+  )
+}
+
+# ------------------------------------------------------------------
+# WikiCFP search + parsing (simplified)
+# ------------------------------------------------------------------
+
+wikicfp_search_url <- "http://www.wikicfp.com/cfp/servlet/tool.search"
+wikicfp_event_base <- "http://www.wikicfp.com/cfp/servlet/event.showcfp"
+
+wikicfp_search <- function(conf, year, debug = FALSE) {
+  cache_f <- sprintf("cache/search_cfp_%s-%s.html",
+    str_replace_all(conf$acronym, "/", "_"), year)
+  soup <- get_soup(wikicfp_search_url, cache_f, query = list(q = conf$acronym, year = year))
+  
+  links <- html_elements(soup, xpath = "//a[contains(@href,'event.showcfp')]")
+  out <- list()
+  for (ln in links) {
+    txt <- str_squish(html_text(ln))
+    parts <- str_split(txt, "\\s+")[[1]]
+    yr <- suppressWarnings(as.integer(tail(parts, 1)))
+    if (is.na(yr) || yr != as.integer(year)) next
+    href <- html_attr(ln, "href")
+    full_url <- url_absolute(href, wikicfp_event_base)
+    event_id <- suppressWarnings(as.integer(str_match(full_url, "eventid=([0-9]+)")[,2]))
+    if (is.na(event_id)) next
+    acronym_guess <- paste(head(parts, -1), collapse = " ")
+    
+    cfp <- build_cfp(acronym_guess, year, event_id, desc = txt, url_cfp = full_url)
+    # attach simple derived attributes used by rating
+    cfp$acronym_words <- split_acronym(cfp$acronym)
+    cfp$topic_keywords <- cfp$acronym_words
+    
+    rating_vec <- conference_rating_tuple(cfp, conf)
+    total_rating <- sum(rating_vec)
+    if (is.finite(total_rating))
+      out[[length(out) + 1]] <- list(cfp = cfp, rating = total_rating, missing = 0)
+  }
+  
+  if (length(out) == 0 && debug) clean_print("No acceptable WikiCFP search results.")
+  out
+}
+
+parse_cfp_page <- function(cfp, debug = FALSE) {
+  if (is.null(cfp$url_cfp)) return(cfp)
+  cache_file <- sprintf("cache/cfp_%s-%s-%s.html",
+    str_replace_all(cfp$acronym, "/", "_"), cfp$year, cfp$id)
+  soup <- get_soup(cfp$url_cfp, cache_file)
+  
+  # Heuristic: gather all text and find date patterns
+  txt <- paste(html_text(html_elements(soup, xpath = "//body//*")), collapse = " ")
+  found <- unique(unlist(str_extract_all(txt, "\\b\\d{4}[-/]\\d{1,2}[-/]\\d{1,2}\\b")))
+  parse_dt <- function(x) {
+    y <- suppressWarnings(ymd(x))
+    if (is.na(y)) y <- suppressWarnings(ymd(str_replace_all(x, "/", "-")))
+    y
+  }
+  parsed <- compact(lapply(found, parse_dt))
+  parsed <- sort(unique(parsed))
+  
+  # Assign rough guesses
+  if (length(parsed) >= 1) {
+    cfp$dates$conf_start <- parsed[length(parsed)]
+    cfp$orig$conf_start <- TRUE
+  }
+  if (length(parsed) >= 2) {
+    cfp$dates$conf_end <- parsed[length(parsed)]
+    cfp$orig$conf_end <- TRUE
+  }
+  cfp
+}
+
+verify_conf_dates <- function(cfp) {
+  if (is.null(cfp$dates$conf_start) || is.null(cfp$dates$conf_end)) return(cfp)
+  start <- cfp$dates$conf_start
+  end <- cfp$dates$conf_end
+  errs <- c()
+  nfix <- 0
+  
+  if (year(start) != cfp$year || year(end) != cfp$year) {
+    start <- update(start, year = cfp$year)
+    end   <- update(end, year = cfp$year)
+    errs <- c(errs, "not in correct year")
+    nfix <- nfix + 1
+  }
+  if (end < start) {
+    tmp <- start; start <- end; end <- tmp
+    errs <- c(errs, "end before start")
+    nfix <- nfix + 1
+  }
+  if (as.numeric(end - start) > 20) {
+    errs <- c(errs, "too far apart")
+  }
+  if (length(errs) == 0) return(cfp)
+  
+  if (nfix > 0) {
+    cfp$dates$conf_start <- start
+    cfp$dates$conf_end <- end
+    cfp$orig$conf_start <- FALSE
+    cfp$orig$conf_end <- FALSE
+  } else {
+    cfp$date_errors <- TRUE
+  }
+  cfp
+}
+
+verify_submission_dates <- function(cfp) {
+  if (is.null(cfp$dates$conf_start)) return(cfp)
+  # We only have conf_start/conf_end in simplified parser; skip deeper logic.
+  cfp
+}
+
+fetch_cfp_data <- function(cfp, debug = FALSE) {
+  if (!is.na(cfp$date_errors)) return(cfp)
+  cfp$date_errors <- FALSE
+  if (!is.null(cfp$url_cfp)) {
+    cfp <- parse_cfp_page(cfp, debug = debug)
+    cfp <- verify_conf_dates(cfp)
+    cfp <- verify_submission_dates(cfp)
+  }
+  cfp
+}
+
+wikicfp_get_cfp <- function(conf, year, debug = FALSE) {
+  results <- wikicfp_search(conf, year, debug = debug)
+  out <- list()
+  for (res in results) {
+    cfpr <- fetch_cfp_data(res$cfp, debug = debug)
+    if (!identical(cfpr$date_errors, TRUE))
+      out[[length(out) + 1]] <- list(cfp = cfpr, rating = res$rating, missing = res$missing)
+  }
+  out
+}
+
+# ------------------------------------------------------------------
+# Extrapolation
+# ------------------------------------------------------------------
+
+extrapolate_from_previous <- function(current, previous) {
+  if (is.null(previous)) return(current)
+  year_shift <- current$year - previous$year
+  if (year_shift <= 0) return(current)
+  
+  # Direct year-shift fields
+  for (field in c("conf_start","submission","abstract","notification","camera_ready")) {
+    if (is.null(current$dates[[field]]) && !is.null(previous$dates[[field]])) {
+      dt <- previous$dates[[field]]
+      shifted <- tryCatch(update(dt, year = year(dt) + year_shift), error = function(e) NA)
+      if (is.na(shifted) && month(dt) == 2 && mday(dt) == 29) {
+        shifted <- make_date(year(dt) + year_shift, 2, 28)
+      }
+      if (!is.na(shifted)) {
+        current$dates[[field]] <- shifted
+        current$orig[[field]] <- FALSE
+      }
+    }
+  }
+  
+  # Relative offsets
+  relative_map <- list(
+    conf_start = c("conf_end","camera_ready"),
+    submission = c("abstract","notification")
+  )
+  for (orig in names(relative_map)) {
+    if (is.null(current$dates[[orig]]) || is.null(previous$dates[[orig]])) next
+    for (fld in relative_map[[orig]]) {
+      if (is.null(current$dates[[fld]]) && !is.null(previous$dates[[fld]])) {
+        delta <- as.numeric(previous$dates[[fld]] - previous$dates[[orig]])
+        current$dates[[fld]] <- current$dates[[orig]] + days(delta)
+        current$orig[[fld]] <- FALSE
+      }
+    }
+  }
+  current
+}
+
+extrapolate_pass <- function(cfps, n = 1) {
+  # Group by acronym and apply lag-based extrapolation
+  by_acr <- split(cfps, sapply(cfps, `[[`, "acronym"))
+  out <- list()
+  for (acr in names(by_acr)) {
+    seq_list <- by_acr[[acr]]
+    seq_list <- seq_list[order(sapply(seq_list, `[[`, "year"))]
+    for (i in seq_along(seq_list)) {
+      prev_i <- i - n
+      if (prev_i >= 1) {
+        seq_list[[i]] <- extrapolate_from_previous(seq_list[[i]], seq_list[[prev_i]])
+      }
+    }
+    out <- c(out, seq_list)
+  }
+  out
+}
+
+# ------------------------------------------------------------------
+# Output assembly
+# ------------------------------------------------------------------
+
+conference_columns <- function() c("Acronym","Title","Rank","Rank system","Field")
+cfp_columns <- function() {
+  dates <- c("abstract","submission","notification","camera_ready","conf_start","conf_end")
+  c(dates, paste0("orig_", dates), "Link", "CFP url")
+}
+
+conference_values <- function(conf, sort = FALSE) {
+  c(conf$acronym, conf$title, conf$rank, conf$ranksys, conf$field)
+}
+
+cfp_value_row <- function(cfp) {
+  dfields <- c("abstract","submission","notification","camera_ready","conf_start","conf_end")
+  date_vals <- map(dfields, ~ if (!is.null(cfp$dates[[.x]])) cfp$dates[[.x]] else NA)
+  orig_vals <- map(dfields, ~ if (!is.null(cfp$orig[[.x]])) cfp$orig[[.x]] else NA)
+  c(date_vals, orig_vals, list(cfp$link), list(cfp$url_cfp))
+}
+
+# ------------------------------------------------------------------
+# Minimal ranking ingestion (placeholder)
+# User may replace with real data sources.
+# ------------------------------------------------------------------
+
+load_rankings <- function() {
+  # If core.csv / ggs.csv exist, read; else create a small example row.
+  core_file <- "core.csv"
+  field = c("Machine learning", "Artificial intelligence", "Data management and data science", "Computer vision and multimedia computation")
+  rank = c("A++", "A*", "A+", "A", "A-", "B", "B-")
+  ggs_file  <- "ggs.csv"
+  
+  core <- if (file.exists(core_file)) read.csv2(core_file, stringsAsFactors = FALSE) else
+    data.frame(acronym = character(), title = character(), ranksys = character(),
+      rank = character(), field = character(), stringsAsFactors = FALSE)
+  acronym_all = core$acronym
+  core = core[core$rank %in% rank & core$field %in% field, ]
+  
+  ggs <- if (file.exists(ggs_file)) read.csv2(ggs_file, stringsAsFactors = FALSE) else
+    data.frame(acronym = character(), title = character(), rank = character(),
+      stringsAsFactors = FALSE)
+  ggs = ggs[ggs$acronym %in% core$acronym, ]
+  
+  if (!"ranksys" %in% names(core) && nrow(core)) core$ranksys <- NA
+  if (!"field" %in% names(core) && nrow(core)) core$field <- NA
+  if (nrow(ggs)) {
+    if (!"ranksys" %in% names(ggs)) ggs$ranksys <- "GGS2021"
+    if (!"field" %in% names(ggs))   ggs$field <- NA
+  }
+  
+  bind_rows(core, ggs)
+}
+
+build_conferences <- function(ranks_df) {
+  if (!nrow(ranks_df)) return(list())
+  ranks_df %>%
+    mutate(
+      acronym = ifelse(is.na(acronym), "", acronym),
+      title   = ifelse(is.na(title), acronym, title),
+      rank    = ifelse(is.na(rank), NA, rank),
+      ranksys = ifelse(is.na(ranksys), NA, ranksys),
+      field   = ifelse(is.na(field), NA, field)
+    ) %>%
+    rowwise() %>%
+    mutate(conf_obj = list(create_conference(acronym, title, rank, ranksys, field))) %>%
+    pull(conf_obj)
+}
+
+# ------------------------------------------------------------------
+# Main update pipeline
+# ------------------------------------------------------------------
+
+run_cfps_update <- function(output_file = "cfp.json",
+  debug = FALSE,
+  delay = 0,
+  use_cache = TRUE) {
+  set_request_delay(delay)
+  set_request_cache(use_cache)
+  
+  today <- Sys.Date()
+  search_years <- seq(year(today - 183), year(today + 365))
+  
+  ranks_df <- load_rankings()
+  conferences <- build_conferences(ranks_df)
+  conf_by_acr <- setNames(conferences, sapply(conferences, `[[`, "acronym"))
+  
+  if (length(conferences) == 0) {
+    clean_print("No conferences loaded (core.csv / ggs.csv missing or empty). Producing empty JSON.")
+    jsonlite::write_json(list(
+      years = search_years[search_years >= year(today)],
+      columns = conference_columns(),
+      cfp_columns = cfp_columns(),
+      data = list(),
+      date = format(Sys.time(), "%Y-%m-%d")
+    ), output_file, auto_unbox = TRUE, pretty = TRUE)
+    return(invisible(NULL))
+  }
+  
+  cfp_matches <- list()
+  
+  for (conf in conferences) {
+    for (yr in search_years) {
+      if (debug) clean_print(sprintf("Looking up CFP %s %s", conf$acronym, yr))
+      res <- tryCatch(wikicfp_get_cfp(conf, yr, debug = debug),
+        error = function(e) { if (debug) clean_print("Error:", e$message); list() })
+      
+      if (length(res) == 0) {
+        # fallback for current/future year only
+        if (yr >= year(today)) {
+          fallback <- build_cfp(conf$acronym, yr)
+          fallback$acronym_words <- conf$acronym_words
+          fallback$topic_keywords <- conf$topic_keywords
+          cfp_matches[[length(cfp_matches) + 1]] <- list(conf = conf, cfp = fallback,
+            year = yr, missing = 999)
+        }
+      } else {
+        for (r in res) {
+          cfp_matches[[length(cfp_matches) + 1]] <- list(conf = conf, cfp = r$cfp,
+            year = yr, missing = r$missing)
+        }
+      }
+    }
+  }
+  
+  if (!length(cfp_matches)) {
+    clean_print("No CFPs found or generated.")
+  }
+  
+  # Deduplicate by (acronym, year) keeping least missing
+  dedup_df <- tibble(
+    idx = seq_along(cfp_matches),
+    acronym = sapply(cfp_matches, function(x) x$conf$acronym),
+    year = sapply(cfp_matches, function(x) x$year),
+    missing = sapply(cfp_matches, function(x) x$missing)
+  ) %>%
+    group_by(acronym, year) %>%
+    slice_min(order_by = missing, n = 1, with_ties = FALSE) %>%
+    ungroup()
+  
+  filtered <- cfp_matches[dedup_df$idx]
+  cfp_objs <- lapply(filtered, `[[`, "cfp")
+  
+  # Two extrapolation passes (n=1 & n=2)
+  cfp_objs <- extrapolate_pass(cfp_objs, n = 1)
+  cfp_objs <- extrapolate_pass(cfp_objs, n = 2)
+  
+  # Organize output
+  future_years <- search_years[search_years >= year(today)]
+  acronyms <- unique(sapply(cfp_objs, `[[`, "acronym"))
+  
+  rows <- list()
+  for (acr in sort(acronyms)) {
+    conf <- conf_by_acr[[acr]]
+    if (is.null(conf)) next
+    conf_vals <- conference_values(conf)
+    
+    year_blocks <- list()
+    for (yr in future_years) {
+      cfp_y <- Filter(function(c) c$acronym == acr && c$year == yr, cfp_objs)
+      if (length(cfp_y) == 0) {
+        year_blocks[[length(year_blocks) + 1]] <- rep(NA, length(cfp_columns()))
+      } else {
+        year_blocks[[length(year_blocks) + 1]] <- cfp_value_row(cfp_y[[1]])
+      }
+    }
+    rows[[length(rows) + 1]] <- c(list(conf_vals), year_blocks)
+  }
+  
+  json_obj <- list(
+    years = future_years,
+    columns = conference_columns(),
+    cfp_columns = cfp_columns(),
+    data = rows,
+    date = format(Sys.time(), "%Y-%m-%d")
+  )
+  
+  write_json(json_obj, output_file, auto_unbox = TRUE, pretty = TRUE, na = "null")
+  clean_print(sprintf("Wrote %s", output_file))
+  
+  invisible(json_obj)
+}
+
+# ------------------------------------------------------------------
+# CLI parsing
+# ------------------------------------------------------------------
+
+parse_args <- function() {
+  args <- commandArgs(trailingOnly = TRUE)
+  list(
+    command = ifelse(length(args) == 0, "cfps", args[[1]]),
+    out = {
+      pos <- which(args == "--out")
+      if (length(pos) == 1 && pos < length(args)) args[pos + 1] else "cfp.json"
+    },
+    debug = "--debug" %in% args,
+    no_cache = "--no-cache" %in% args,
+    delay = {
+      darg <- args[str_detect(args, "^--delay=")]
+      if (length(darg)) as.numeric(sub("^--delay=", "", darg[1])) else 0
+    }
+  )
+}
+
+main <- function() {
+  opts <- parse_args()
+  if (opts$command == "cfps") {
+    run_cfps_update(
+      output_file = opts$out,
+      debug = opts$debug,
+      delay = opts$delay,
+      use_cache = !opts$no_cache
+    )
+  } else {
+    clean_print("Unknown command. Use: cfps  (other commands removed in simplified version)")
+  }
+}
+
+# Execute if run as script
+if (identical(environment(), globalenv()) && !length(sys.frames())) {
+  main()
+}
+
+# ---------------------------
+# Notes / Future Enhancements
+# ---------------------------
+# - Parsing is heuristic: refine parse_cfp_page() to map real WikiCFP structure.
+# - Add multiple-deadline detection if needed.
+# - Add proper abstract/submission/notification/camera_ready extraction via pattern rules.
+# - Integrate real ranking scrapers if parity with Python is required.

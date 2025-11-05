@@ -33,7 +33,7 @@ jobs:
         # Takes ~3h50 with 2.5s delay, limit for github actions is 6h.
         # wikicfp recommends 5s delay but with 4s the process already would last est. 6h09.
         # Alternately 3s (est. 4h37) or 3.5s (est. 5h23)?
-        (( $RANDOM < 32768 / 30 )) && python3 ./updater.py --no-cache --delay 2.5 core | cat
+        (( 0 )) && python3 ./updater.py --no-cache --delay 2.5 core | cat
         (( $RANDOM < 32768 / 30 )) && python3 ./updater.py --no-cache ggs | cat
         python3 ./updater.py --no-cache --delay 2.5 cfps | cat
 
@@ -43,7 +43,7 @@ jobs:
         REPO: ${{ github.repository }}
       run: |
         # Stage files that may have changed
-        git add core.csv cfp.json parsing_errors.txt || true
+        git add cfp.json parsing_errors.txt || true
 
         # Commit if there is anything to commit (avoid failing on "nothing to commit")
         if ! git diff --cached --quiet; then
